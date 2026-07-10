@@ -1,0 +1,21 @@
+# Secrets — never commit keys or env files
+.env
+.env.*
+!.env.example
+*.key
+
+# Node
+node_modules/
+dist/
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# User-local watchlist (commit the .example instead)
+bot/tokens.json
+
+# Logs / OS
+*.log
+.DS_Store

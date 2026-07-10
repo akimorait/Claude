@@ -1,0 +1,13 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = []
+solc_version = "0.8.30"
+evm_version = "cancun"       # transient storage (EIP-1153) requires >= cancun
+optimizer = true
+optimizer_runs = 10_000      # deployed once, called hot — favor runtime gas
+
+[fuzz]
+runs = 512

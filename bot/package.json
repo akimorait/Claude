@@ -1,0 +1,22 @@
+{
+  "name": "dex-arb-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Uniswap V2 <> SushiSwap atomic arbitrage bot (monitoring + execution)",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/index.ts",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.8.0"
+  }
+}
