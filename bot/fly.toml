@@ -1,0 +1,29 @@
+# Fly.io config for dex-arb-bot.
+#
+# This app is a background worker: it opens an outbound WebSocket to your RPC and
+# submits transactions. It runs no web server, so there is intentionally NO
+# [http_service] / [[services]] block and no exposed port — that keeps the
+# machine running continuously instead of being auto-stopped when "idle".
+#
+# Secrets (RPC_URL, PRIVATE_KEY) are set with `fly secrets set`, never here.
+
+app = "REPLACE-WITH-YOUR-APP-NAME"
+primary_region = "ash"            # Ashburn/us-east; change to your nearest region
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Non-secret configuration only.
+[env]
+  DRY_RUN = "true"                # <- flip to "false" and `fly deploy` to go live
+  MODE = "flash"
+  SUBMIT = "flashbots"
+  CHAIN_ID = "1"
+  CONTRACT_ADDRESS = "0xEe69127691f6B7E4c702C2B9055CAdC90FFD2345"
+  TOKENS_FILE = "tokens.example.json"
+  LOG_LEVEL = "info"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "512mb"
