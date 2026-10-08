@@ -178,7 +178,7 @@ if __name__ == "__main__":
     s, S = table(); open("out/table2.svg", "w").write(s); print("table scale", S)
     s, S = pendants(); open("out/pendant2.svg", "w").write(s); print("pendant scale", S)
 
-def single(name, img, H, W, sub="", pendant=False, size=2048):
+def single(name, img, H, W, sub="", pendant=False, size=2048, shade_h=None, cord=None):
     """One product, square, for the product page gallery."""
     global SIZE
     SIZE = size
@@ -190,8 +190,9 @@ def single(name, img, H, W, sub="", pendant=False, size=2048):
     lamp_w = it.width_cm() * S
     left = size/2 - lamp_w/2 - RES*S
     base = size - m - 190 if not pendant else None
-    o = [f'<text x="{m}" y="{m+60}" font-size="68" font-weight="600" fill="{INK}" letter-spacing="-1">{name}</text>',
-]
+    o = [f'<text x="{m}" y="{m+60}" font-size="68" font-weight="600" fill="{INK}" letter-spacing="-1">{name}</text>']
+    if cord:
+        o.append(f'<text x="{m}" y="{m+118}" font-size="34" fill="{SUB}">Cable length {cord}</text>')
     if pendant:
         ceiling = m + 230; hang = size - m - 190 - H*S
         o.append(f'<line x1="{m}" y1="{ceiling}" x2="{size-m}" y2="{ceiling}" stroke="{INK}" stroke-opacity="0.18" stroke-width="2"/>')
@@ -200,6 +201,14 @@ def single(name, img, H, W, sub="", pendant=False, size=2048):
     else:
         o.append(f'<line x1="{m}" y1="{base}" x2="{size-m}" y2="{base}" stroke="{INK}" stroke-opacity="0.18" stroke-width="2"/>')
         o += [s for s in place([it], S, left, base) if 'font-weight="600"' not in s]
+    if shade_h and not pendant:
+        iw = H * S * it.aspect
+        xr = size/2 + iw/2 + 16
+        top = base - H*S; sb = top + shade_h*S; mid = (top + sb)/2
+        o += [f'<line x1="{xr}" y1="{top}" x2="{xr}" y2="{sb}" stroke="{DIM}" stroke-width="2"/>',
+              f'<line x1="{xr-8}" y1="{top}" x2="{xr+8}" y2="{top}" stroke="{DIM}" stroke-width="2"/>',
+              f'<line x1="{xr-8}" y1="{sb}" x2="{xr+8}" y2="{sb}" stroke="{DIM}" stroke-width="2"/>',
+              f'<text x="{xr+44}" y="{mid}" transform="rotate(-90 {xr+44} {mid})" text-anchor="middle" font-size="27" fill="{SUB}">shade {fmt(shade_h)}</text>']
     mx = left + RES*S + lamp_w + 6*S - 1.0*S
     o += [s for s in place([mug], S, mx, base) if "<text" not in s]
     o.append(f'<text x="{mx + (1.0 + mug.width_cm()/2)*S}" y="{base + 80}" text-anchor="middle" font-size="27" fill="{SUB}">Mug for scale</text>')
