@@ -7,7 +7,7 @@ INK = "#2B2825"; BG = "#F5F1EB"; DIM = "#A59D93"; SUB = "#857C72"; MUG = "#B3AAA
 RES = 4.2   # cm reserved left of each lamp for the height line
 GAP = 2.4   # cm between items
 
-DECABLE = {"mocha_10", "bubble_14", "bubble_19", "bubble_24", "palermo_07", "palermotall_08", "pleaty_00", "shortstack_10", "superpleaty_16", "superpleaty_28", "cloud_00", "matcha_09", "limtall_00", "limoncello_07", "mocha_00", "bubble_11", "minibubble_00"}
+DECABLE = {"own_natural", "own_mandarin", "own_candy", "own_matcha", "mocha_10", "bubble_14", "bubble_19", "bubble_24", "palermo_07", "palermotall_08", "pleaty_00", "shortstack_10", "superpleaty_16", "superpleaty_28", "cloud_00", "matcha_09", "limtall_00", "limoncello_07", "mocha_00", "bubble_11", "minibubble_00"}
 
 def decable(im, k=25):
     from scipy import ndimage

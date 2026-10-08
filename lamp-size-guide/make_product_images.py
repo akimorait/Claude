@@ -1,10 +1,7 @@
 import compose, subprocess, os
 JOBS = [  # handle, photo, H, W
-    ("mocha-lamp", "mocha_00", 31.5, 16), ("mocha-lamp-natural", "mocha_10", 31.5, 16),
-    ("matcha-lamp", "matcha_09", 30, 15),
-    ("bubble-lamp-natural", "bubble_19", 23, 15), ("bubble-lamp-mandarin", "bubble_14", 23, 15),
-    ("bubble-lamp-lemon", "bubble_11", 23, 15), ("bubble-lamp-candy", "bubble_24", 23, 15),
-    ("cloud-lamp", "cloud_00", 21, 15),
+    ("matcha-lamp", "own_matcha", 30, 15),
+    ("bubble-lamp-mandarin", "own_mandarin", 23, 15), ("bubble-lamp-candy", "own_candy", 23, 15),
 ]
 names = []
 for h, p, H, W in JOBS:
