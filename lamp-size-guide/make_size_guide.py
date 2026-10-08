@@ -185,13 +185,13 @@ def single(name, img, H, W, sub="", pendant=False, size=2048):
     it = Item(name, sub, img, H, W, pendant)
     mug = Item("Mug", "", None, 9.5, 8)
     m = 150
-    S = min((size - 2*m - 420) / H, (size - 2*m - 300) / (it.width_cm() + mug.width_cm() + 10))
+    # lamp centred; the mug sits to its right and must still fit inside the margin
+    S = min((size - 2*m - 360) / H, (size/2 - m - 40) / (it.width_cm()/2 + 6 + mug.width_cm()))
     lamp_w = it.width_cm() * S
-    group = RES*S + lamp_w + 6*S + mug.width_cm()*S
-    left = (size - group) / 2
+    left = size/2 - lamp_w/2 - RES*S
     base = size - m - 190 if not pendant else None
     o = [f'<text x="{m}" y="{m+60}" font-size="68" font-weight="600" fill="{INK}" letter-spacing="-1">{name}</text>',
-         f'<text x="{m}" y="{m+118}" font-size="34" fill="{SUB}">{fmt(H)} tall · {fmt(W)} wide</text>']
+]
     if pendant:
         ceiling = m + 230; hang = size - m - 190 - H*S
         o.append(f'<line x1="{m}" y1="{ceiling}" x2="{size-m}" y2="{ceiling}" stroke="{INK}" stroke-opacity="0.18" stroke-width="2"/>')
