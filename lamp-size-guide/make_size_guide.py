@@ -60,7 +60,7 @@ def width_line(x0, x1, y, label):
     return [f'<line x1="{x0}" y1="{y}" x2="{x1}" y2="{y}" stroke="{DIM}" stroke-width="2"/>',
             f'<line x1="{x0}" y1="{y-8}" x2="{x0}" y2="{y+8}" stroke="{DIM}" stroke-width="2"/>',
             f'<line x1="{x1}" y1="{y-8}" x2="{x1}" y2="{y+8}" stroke="{DIM}" stroke-width="2"/>',
-            f'<text x="{(x0+x1)/2}" y="{y+40}" text-anchor="middle" font-size="27" fill="{SUB}">{label}</text>']
+            f'<text x="{(x0+x1)/2}" y="{y+48}" text-anchor="middle" font-size="27" fill="{SUB}">{label}</text>']
 
 def mug_svg(cx, base, S):
     def P(pts): return " ".join(f"{cx + x*S:.1f},{base - y*S:.1f}" for x, y in pts)
@@ -177,3 +177,31 @@ def pendants():
 if __name__ == "__main__":
     s, S = table(); open("out/table2.svg", "w").write(s); print("table scale", S)
     s, S = pendants(); open("out/pendant2.svg", "w").write(s); print("pendant scale", S)
+
+def single(name, img, H, W, sub="", pendant=False, size=2048):
+    """One product, square, for the product page gallery."""
+    global SIZE
+    SIZE = size
+    it = Item(name, sub, img, H, W, pendant)
+    mug = Item("Mug", "", None, 9.5, 8)
+    m = 150
+    S = min((size - 2*m - 420) / H, (size - 2*m - 300) / (it.width_cm() + mug.width_cm() + 10))
+    lamp_w = it.width_cm() * S
+    group = RES*S + lamp_w + 6*S + mug.width_cm()*S
+    left = (size - group) / 2
+    base = size - m - 190 if not pendant else None
+    o = [f'<text x="{m}" y="{m+60}" font-size="68" font-weight="600" fill="{INK}" letter-spacing="-1">{name}</text>',
+         f'<text x="{m}" y="{m+118}" font-size="34" fill="{SUB}">{fmt(H)} tall · {fmt(W)} wide</text>']
+    if pendant:
+        ceiling = m + 230; hang = size - m - 190 - H*S
+        o.append(f'<line x1="{m}" y1="{ceiling}" x2="{size-m}" y2="{ceiling}" stroke="{INK}" stroke-opacity="0.18" stroke-width="2"/>')
+        o += place([it], S, left, None, name_y=size - m - 40, hang_top=hang, ceiling=ceiling)
+        base = hang + H*S
+    else:
+        o.append(f'<line x1="{m}" y1="{base}" x2="{size-m}" y2="{base}" stroke="{INK}" stroke-opacity="0.18" stroke-width="2"/>')
+        o += [s for s in place([it], S, left, base) if 'font-weight="600"' not in s]
+    mx = left + RES*S + lamp_w + 6*S - 1.0*S
+    o += [s for s in place([mug], S, mx, base) if "<text" not in s]
+    o.append(f'<text x="{mx + (1.0 + mug.width_cm()/2)*S}" y="{base + 80}" text-anchor="middle" font-size="27" fill="{SUB}">Mug for scale</text>')
+    o = [x.replace('font-size="27"', 'font-size="38"').replace('y="{}"', '') for x in o]
+    return svg(o)
