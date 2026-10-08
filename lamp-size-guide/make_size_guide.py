@@ -7,7 +7,7 @@ INK = "#2B2825"; BG = "#F5F1EB"; DIM = "#A59D93"; SUB = "#857C72"; MUG = "#B3AAA
 RES = 4.2   # cm reserved left of each lamp for the height line
 GAP = 2.4   # cm between items
 
-DECABLE = {"palermo_07", "palermotall_08", "pleaty_00", "shortstack_10", "superpleaty_16", "cloud_00", "matcha_09", "limtall_00", "limoncello_07", "mocha_00", "bubble_11", "minibubble_00"}
+DECABLE = {"palermo_07", "palermotall_08", "pleaty_00", "shortstack_10", "superpleaty_16", "superpleaty_28", "cloud_00", "matcha_09", "limtall_00", "limoncello_07", "mocha_00", "bubble_11", "minibubble_00"}
 
 def decable(im, k=25):
     from scipy import ndimage
@@ -32,7 +32,7 @@ def load(name, pendant=False):
     y0, y1, x0, x1 = rows[0], rows[-1], cols[0], cols[-1]
     if pendant:  # drop the hanging cord above the housing
         w = m.sum(1); mx = w.max()
-        while y0 < y1 and w[y0] < 0.12 * mx:
+        while y0 < y1 and not (w[y0:y0+60] >= 0.12 * mx).all():
             y0 += 1
     else:        # drop thin cables lying beside the lamp
         h = m[y0:y1+1].sum(0); hmax = y1 - y0
@@ -78,8 +78,6 @@ class Item:
         self.aspect = 8.6 / 9.5 if self.mug else self.im.width / self.im.height  # mug body+handle ≈ 11.6 wide
         if not self.mug:
             self.photo_w = H * self.aspect
-            if abs(self.photo_w - W) / W <= 0.16:   # small camera-angle difference: match the listed width
-                self.aspect = W / H
     def width_cm(self):
         return 11.6 if self.mug else max(self.H * self.aspect, self.W)
     def footprint(self):
@@ -127,9 +125,9 @@ def svg(body):
 SUBTITLE = "Size guide · all lamps shown to scale · measurements in cm"
 
 def table():
-    r1 = [Item("Big Lamp", "Yellow · Brown", "big_00", 60, 25), Item("Super Pleaty", "", "superpleaty_16", 36, 24),
-          Item("Limoncello Tall", "", "limtall_00", 35, 16), Item("Mocha", "", "mocha_00", 31.5, 16),
-          Item("Matcha", "", "matcha_09", 30, 15), Item("Limoncello", "", "limoncello_07", 30, 16),
+    r1 = [Item("Big Lamp", "Yellow · Brown", "big_00", 60, 25), Item("Super Pleaty", "", "superpleaty_28", 36, 24),
+          Item("Limoncello Tall", "", "limtall_00", 35, 23), Item("Mocha", "", "mocha_00", 31.5, 16),
+          Item("Matcha", "", "matcha_09", 30, 15), Item("Limoncello", "", "limoncello_07", 30, 23),
           Item("Palermo Tall", "", "palermotall_08", 30, 25)]
     r2 = [Item("Pleaty", "", "pleaty_00", 26, 24), Item("Palermo", "", "palermo_07", 25, 25),
           Item("Bubble", "", "bubble_11", 23, 15), Item("Cloud", "", "cloud_00", 21, 15),
@@ -155,7 +153,7 @@ def table():
 def pendants():
     global GAP
     GAP = 6
-    row = [Item("Cosmo", "", "cosmo_02", 29, 21, True), Item("Astro", "", "astro_00", 27, 26, True),
+    row = [Item("Cosmo", "", "cosmo_02", 29, 21, True), Item("Astro", "", "astro_05", 27, 26, True),
            Item("Otto", "", "otto_01", 25, 15, True)]
     for it in row:
         print(f"{it.name:16s} photo width {it.H*it.aspect:5.1f} cm vs listed {it.W}")
