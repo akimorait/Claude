@@ -7,7 +7,7 @@ INK = "#2B2825"; BG = "#F5F1EB"; DIM = "#A59D93"; SUB = "#857C72"; MUG = "#B3AAA
 RES = 4.2   # cm reserved left of each lamp for the height line
 GAP = 2.4   # cm between items
 
-DECABLE = {"palermo_07", "palermotall_08", "pleaty_00", "shortstack_10", "superpleaty_16", "superpleaty_28", "cloud_00", "matcha_09", "limtall_00", "limoncello_07", "mocha_00", "bubble_11", "minibubble_00"}
+DECABLE = {"mocha_10", "bubble_14", "bubble_19", "bubble_24", "palermo_07", "palermotall_08", "pleaty_00", "shortstack_10", "superpleaty_16", "superpleaty_28", "cloud_00", "matcha_09", "limtall_00", "limoncello_07", "mocha_00", "bubble_11", "minibubble_00"}
 
 def decable(im, k=25):
     from scipy import ndimage
@@ -184,9 +184,9 @@ def single(name, img, H, W, sub="", pendant=False, size=2048, shade_h=None, cord
     SIZE = size
     it = Item(name, sub, img, H, W, pendant)
     mug = Item("Mug", "", None, 9.5, 8)
-    m = 150
+    m = 120
     # lamp centred; the mug sits to its right and must still fit inside the margin
-    S = min((size - 2*m - 260) / H, (size/2 - m - 40) / (it.width_cm()/2 + 6 + mug.width_cm()))
+    S = min((size - 2*m - 260) / H, (size/2 - m - 10) / (it.width_cm()/2 + 3 + mug.width_cm()))
     lamp_w = it.width_cm() * S
     left = size/2 - lamp_w/2 - RES*S
     base = (size + H*S) / 2 - 40 if not pendant else None
@@ -207,7 +207,7 @@ def single(name, img, H, W, sub="", pendant=False, size=2048, shade_h=None, cord
               f'<line x1="{xr-8}" y1="{top}" x2="{xr+8}" y2="{top}" stroke="{DIM}" stroke-width="2"/>',
               f'<line x1="{xr-8}" y1="{sb}" x2="{xr+8}" y2="{sb}" stroke="{DIM}" stroke-width="2"/>',
               f'<text x="{xr+44}" y="{mid}" transform="rotate(-90 {xr+44} {mid})" text-anchor="middle" font-size="27" fill="{SUB}">shade {fmt(shade_h)}</text>']
-    mx = left + RES*S + lamp_w + 6*S - 1.0*S
+    mx = left + RES*S + lamp_w + 3*S - 1.0*S
     o += [s for s in place([mug], S, mx, base) if "<text" not in s]
     o.append(f'<text x="{mx + (1.0 + mug.width_cm()/2)*S}" y="{base + 80}" text-anchor="middle" font-size="27" fill="{SUB}">Mug for scale</text>')
     if cord:
