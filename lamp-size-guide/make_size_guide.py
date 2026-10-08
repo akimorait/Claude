@@ -186,13 +186,11 @@ def single(name, img, H, W, sub="", pendant=False, size=2048, shade_h=None, cord
     mug = Item("Mug", "", None, 9.5, 8)
     m = 150
     # lamp centred; the mug sits to its right and must still fit inside the margin
-    S = min((size - 2*m - 360) / H, (size/2 - m - 40) / (it.width_cm()/2 + 6 + mug.width_cm()))
+    S = min((size - 2*m - 260) / H, (size/2 - m - 40) / (it.width_cm()/2 + 6 + mug.width_cm()))
     lamp_w = it.width_cm() * S
     left = size/2 - lamp_w/2 - RES*S
-    base = size - m - 190 if not pendant else None
-    o = [f'<text x="{m}" y="{m+60}" font-size="68" font-weight="600" fill="{INK}" letter-spacing="-1">{name}</text>']
-    if cord:
-        o.append(f'<text x="{m}" y="{m+118}" font-size="34" fill="{SUB}">Cable length {cord}</text>')
+    base = (size + H*S) / 2 - 40 if not pendant else None
+    o = []
     if pendant:
         ceiling = m + 230; hang = size - m - 190 - H*S
         o.append(f'<line x1="{m}" y1="{ceiling}" x2="{size-m}" y2="{ceiling}" stroke="{INK}" stroke-opacity="0.18" stroke-width="2"/>')
@@ -212,5 +210,7 @@ def single(name, img, H, W, sub="", pendant=False, size=2048, shade_h=None, cord
     mx = left + RES*S + lamp_w + 6*S - 1.0*S
     o += [s for s in place([mug], S, mx, base) if "<text" not in s]
     o.append(f'<text x="{mx + (1.0 + mug.width_cm()/2)*S}" y="{base + 80}" text-anchor="middle" font-size="27" fill="{SUB}">Mug for scale</text>')
+    if cord:
+        o.append(f'<text x="{m}" y="{base + 80}" font-size="27" fill="{SUB}">Cable length {cord}</text>')
     o = [x.replace('font-size="27"', 'font-size="38"').replace('y="{}"', '') for x in o]
     return svg(o)
