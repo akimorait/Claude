@@ -1,6 +1,6 @@
 # Pocket newsletter popup (with A/B test)
 
-A new email sign-up popup for pocketpickedit.com, in three designs that can be
+A new email sign-up popup for pocketpickedit.com, in five designs that can be
 tested against each other.
 
 | Design | What it looks like |
@@ -8,8 +8,10 @@ tested against each other.
 | **A · Pocket Pop** | Centred card with the cream scrolling strip, the four logo dots and the orange halo button. |
 | **B · Lights On** | Split card. A lamp photo flickers on as it opens, next to a cream panel. |
 | **C · Colour Pick** | Small corner card (bottom sheet on phones) that asks for a favourite colour, then the email. |
+| **D · Room Match** | Visitors pick the room it's for (living room, bedroom, desk, dining), see a matching lamp, then sign up. The thank-you button links to that lamp. |
+| **E · Print Job** | A receipt prints down from the top of the screen like a 3D printer, with a "printing" bar before the code appears. |
 
-Open `preview.html` in a browser to click through all three.
+Open `preview.html` in a browser to click through all five.
 
 ## What gets installed
 
@@ -23,7 +25,7 @@ setting (words, discount code, test shares, timing, photo) can be changed in
 2. On the copy: **⋯ → Edit code → sections → Add a new section**, name it
    `pocket-newsletter-popup`, replace the contents with this file's contents, Save.
 3. **Customize** the copy → **Footer → Add section → Newsletter popup**.
-4. Preview it. To see one design directly, add `?pp_popup=A` (or `B`, `C`) to any page address.
+4. Preview it. To see one design directly, add `?pp_popup=A` (or `B` to `E`) to any page address.
 5. Switch off the old Shopify Forms popup (Apps → Shopify Forms) so visitors don't get two.
    Once the new one has run for a week or two without problems, you can uninstall Shopify Forms.
    Before uninstalling, check it isn't used anywhere else on the site and that your welcome
@@ -32,25 +34,27 @@ setting (words, discount code, test shares, timing, photo) can be changed in
 
 ## How the A/B test works
 
-- **Who sees what.** Each new visitor is randomly given A, B or C using the
-  shares in the settings (34 / 33 / 33 by default). They keep the same design on
+- **Who sees what.** Each new visitor is randomly given one design using the
+  shares in the settings (20% each by default). They keep the same design on
   every visit.
-- **What's counted.** Views, closes and sign-ups are sent to Google Analytics as
-  `popup_view`, `popup_close`, `popup_signup` (and `popup_colour` for C), each
-  with `popup_variant` = A, B or C.
+- **What's counted.** Views, closes and sign-ups go to Google Analytics (through
+  the Google tag Littledata already loads) with the design letter in the event
+  name: `popup_view_a`, `popup_close_a`, `popup_signup_a`, `popup_choice_a`
+  (colour or room picked), up to `_e`. No Google Analytics setup is needed.
 - **Who signed up.** Every subscriber is tagged in Shopify: `newsletter`,
-  `popup-A` / `popup-B` / `popup-C`, the test name, plus `customer-code` (same
-  tag as your current form). Design C also adds `colour-lemon`, `colour-candy`, etc.
+  `popup-A` to `popup-E`, the test name, plus `customer-code` (same tag as your
+  current form). Design C adds `colour-lemon` etc., design D adds `room-bedroom` etc.
 - **The thank-you screen** shows your code `POCKET3141` ($10 off orders over
   $100) with a copy button.
 
 ### Reading the results
 
-- **Quickest:** Shopify → Customers → filter by tag `popup-A`, then `popup-B`,
-  then `popup-C`. Most sign-ups wins (the visitor split is even).
-- **Fairer:** in Google Analytics, sign-up rate = `popup_signup` ÷ `popup_view`
-  for each design. One-time setup: Admin → Custom definitions → add
-  `popup_variant` as an event-scoped dimension.
+- **Results tracker:** the "Popup test results" page pulls live numbers from
+  Google Analytics (views, sign-ups, sign-up rate per design) and Shopify
+  (subscribers, who has ordered, how much they spent), next to your old
+  popup's history for comparison.
+- **By hand:** Shopify → Customers → filter by tag `popup-A` … `popup-E`, or in
+  Google Analytics → Reports → Events, compare `popup_signup_a` ÷ `popup_view_a`.
 - Give it 2–4 weeks, or about 100 sign-ups per design, before calling it.
 - **When you have a winner:** set the other two shares to 0. To test something new
   (e.g. two headlines), change the **Test name** so everyone is shuffled again.

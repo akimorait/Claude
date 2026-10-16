@@ -52,7 +52,7 @@ h1 { margin: 0; font: 700 clamp(34px, 5vw, 52px)/1.02 var(--display); letter-spa
 .top p { margin: 0; color: var(--muted); }
 
 /* direction picker */
-.picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
 .dir {
   display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: start;
   padding: 16px 18px; text-align: left; cursor: pointer;
@@ -199,13 +199,15 @@ code { font: 500 12.5px var(--mono); background: var(--chip); padding: 1px 6px; 
   <header class="top">
     <div class="brand"><span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Pocket Picked It · newsletter popup</div>
     <h1>Pick your popup.</h1>
-    <p>Three designs built from your site's fonts, colours and halo buttons. All three can run at once in an A/B test, and the one that turns the most visitors into subscribers wins. Click a design to see it on your homepage.</p>
+    <p>Five designs built from your site's fonts, colours and halo buttons. They can all run at once in an A/B test, and the one that turns the most visitors into subscribers wins. Click a design to see it on your homepage.</p>
   </header>
 
   <div class="picker" role="tablist" aria-label="Design directions">
     <button class="dir" role="tab" id="dir-A" data-v="A" aria-selected="true"><b>A</b><strong>Pocket Pop</strong><span>Your homepage in a card: the cream scrolling strip, the four logo dots and the orange halo button.</span></button>
     <button class="dir" role="tab" id="dir-B" data-v="B" aria-selected="false"><b>B</b><strong>Lights On</strong><span>A lamp photo that flickers on as the popup opens, next to a warm cream panel.</span></button>
     <button class="dir" role="tab" id="dir-C" data-v="C" aria-selected="false"><b>C</b><strong>Colour Pick</strong><span>A small corner card that asks for a favourite colour first, then the email.</span></button>
+    <button class="dir" role="tab" id="dir-D" data-v="D" aria-selected="false"><b>D</b><strong>Room Match</strong><span>Visitors pick the room it's for and get a matching lamp, then sign up.</span></button>
+    <button class="dir" role="tab" id="dir-E" data-v="E" aria-selected="false"><b>E</b><strong>Print Job</strong><span>A receipt prints down from the top of the screen, like your 3D printers.</span></button>
   </div>
 
   <div class="bar">
@@ -278,21 +280,25 @@ code { font: 500 12.5px var(--mono); background: var(--chip); padding: 1px 6px; 
       <h2>How the A/B test works</h2>
       <ol class="steps">
         <li><p><strong>Each new visitor gets one design.</strong> It's picked at random using the shares you set, and they keep seeing the same one on every visit.</p></li>
-        <li><p><strong>Every view, close and sign-up is counted.</strong> These go to your Google Analytics as <code>popup_view</code>, <code>popup_close</code> and <code>popup_signup</code>, labelled A, B or C.</p></li>
-        <li><p><strong>Every subscriber is tagged in Shopify.</strong> Look under Customers for <code>popup-A</code>, <code>popup-B</code> or <code>popup-C</code>. They also keep your <code>customer-code</code> tag.</p></li>
+        <li><p><strong>Every view, close and sign-up is counted.</strong> They go to your Google Analytics with the design letter in the name, like <code>popup_view_b</code> and <code>popup_signup_b</code>. Nothing to set up.</p></li>
+        <li><p><strong>Every subscriber is tagged in Shopify.</strong> Look under Customers for <code>popup-A</code> to <code>popup-E</code>. They also keep your <code>customer-code</code> tag.</p></li>
         <li><p><strong>Pick the winner.</strong> After a few weeks, set the losing designs to 0% in the theme editor. No code changes needed.</p></li>
       </ol>
     </section>
     <section class="panel sim">
       <h2>Try the split</h2>
-      <div class="sim-row"><label for="wA">A</label><input type="range" id="wA" min="0" max="100" value="34"><output id="oA" for="wA">34%</output></div>
-      <div class="sim-row"><label for="wB">B</label><input type="range" id="wB" min="0" max="100" value="33"><output id="oB" for="wB">33%</output></div>
-      <div class="sim-row"><label for="wC">C</label><input type="range" id="wC" min="0" max="100" value="33"><output id="oC" for="wC">33%</output></div>
+      <div class="sim-row"><label for="wA">A</label><input type="range" id="wA" min="0" max="100" value="20"><output id="oA" for="wA">20%</output></div>
+      <div class="sim-row"><label for="wB">B</label><input type="range" id="wB" min="0" max="100" value="20"><output id="oB" for="wB">20%</output></div>
+      <div class="sim-row"><label for="wC">C</label><input type="range" id="wC" min="0" max="100" value="20"><output id="oC" for="wC">20%</output></div>
+      <div class="sim-row"><label for="wD">D</label><input type="range" id="wD" min="0" max="100" value="20"><output id="oD" for="wD">20%</output></div>
+      <div class="sim-row"><label for="wE">E</label><input type="range" id="wE" min="0" max="100" value="20"><output id="oE" for="wE">20%</output></div>
       <button class="act" id="simulate" type="button">Send 1,000 pretend visitors</button>
       <div class="bars" id="bars">
         <div><b>A</b><span class="track"><span class="fill"></span></span><em>–</em></div>
         <div><b>B</b><span class="track"><span class="fill"></span></span><em>–</em></div>
         <div><b>C</b><span class="track"><span class="fill"></span></span><em>–</em></div>
+        <div><b>D</b><span class="track"><span class="fill"></span></span><em>–</em></div>
+        <div><b>E</b><span class="track"><span class="fill"></span></span><em>–</em></div>
       </div>
       <p class="note">Uses the exact same picker that runs on your store.</p>
     </section>
@@ -304,13 +310,25 @@ code { font: 500 12.5px var(--mono); background: var(--chip); padding: 1px 6px; 
   "preview": true,
   "mount": "#vp",
   "experiment": "popup-test-1",
-  "weights": { "A": 34, "B": 33, "C": 33 },
+  "weights": { "A": 20, "B": 20, "C": 20, "D": 20, "E": 20 },
   "eyebrow": "✹ the pocket list",
   "marquee": "new designs ✹ fresh colours ✹ early-bird specials ✹ made in melbourne ✹",
   "headlineA": "Get first dibs on new lamps.",
   "headlineB": "Be first to the glow.",
   "headlineC": "What's your colour?",
   "headlineC2": "Good pick. [colour] it is.",
+  "headlineD": "Where's your next lamp going?",
+  "headlineD2": "[room] it is.",
+  "bodyD": "Tell us the room and we'll send lamp ideas that suit it, plus first dibs on new designs.",
+  "rooms": [
+    { "id": "living-room", "name": "Living room", "mood": "cosy & warm", "product": "Mocha Lamp", "price": "$165.00", "url": "#", "image": "__IMG_mocha__" },
+    { "id": "bedroom", "name": "Bedroom", "mood": "calm & soft", "product": "Bubble Lamp", "price": "$155.00", "url": "#", "image": "__IMG_bubble__" },
+    { "id": "desk", "name": "Desk", "mood": "bright & focused", "product": "Limoncello Lamp", "price": "$155.00", "url": "#", "image": "__IMG_limoncello_t__" },
+    { "id": "dining", "name": "Dining", "mood": "moody glow", "product": "Astro Pendant Lamp", "price": "$195.00", "url": "#", "image": "__IMG_astro__" }
+  ],
+  "headlineE": "Print yourself $10 off.",
+  "buttonE": "Start print",
+  "receipt": "Item | $10 off\nMin. spend | $100\nMade in | Melbourne\nStatus | waiting on you",
   "body": "Our monthly newsletter: new designs, fresh colours and early-bird specials, straight from the Melbourne studio.",
   "offer": "$10 off your first order over $100",
   "button": "Join the list",
@@ -344,6 +362,14 @@ code { font: 500 12.5px var(--mono); background: var(--chip); padding: 1px 6px; 
       best: 'The gentlest ask. You also learn each subscriber’s favourite colour, so you can email lemon fans about new lemon lamps.',
       watch: 'No dark overlay, so it is easier to ignore.',
       tags: '<code>popup-C</code> <code>colour-lemon</code> (etc.) <code>customer-code</code>' },
+    D: { name: 'D · Room Match',
+      best: 'Selling, not just signing up. Each visitor sees a lamp picked for their room, and the thank-you button links straight to it. You also learn which rooms people are shopping for.',
+      watch: 'Two steps before the email, so some people may drop off. The room lamps are set in the theme editor.',
+      tags: '<code>popup-D</code> <code>room-bedroom</code> (etc.) <code>customer-code</code>' },
+    E: { name: 'E · Print Job',
+      best: 'Standing out. Nothing else looks like it, and it tells your made-by-machines story in a few seconds.',
+      watch: 'The most playful of the five, so it is the riskiest. The receipt text is set in the theme editor.',
+      tags: '<code>popup-E</code> <code>customer-code</code>' },
   };
 
   const wrap = document.getElementById('stageWrap');
@@ -407,19 +433,19 @@ code { font: 500 12.5px var(--mono); background: var(--chip); padding: 1px 6px; 
     const { name, params } = e.detail;
     const empty = log.querySelector('.empty');
     if (empty) empty.remove();
-    const extra = params.popup_trigger || params.close_method || (params.popup_colour && params.popup_colour !== 'none' ? params.popup_colour : '') || '';
+    const extra = params.popup_trigger || params.close_method || (params.popup_choice && params.popup_choice !== 'none' ? params.popup_choice : '') || '';
     const secs = Math.round((Date.now() - t0) / 1000);
     const li = document.createElement('li');
     li.innerHTML = '<time>' + Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0') + '</time>' +
       '<span class="v">' + params.popup_variant + '</span><span class="e"><b></b> <span></span></span>';
-    li.querySelector('b').textContent = name;
+    li.querySelector('b').textContent = name + '_' + String(params.popup_variant).toLowerCase();
     li.querySelector('.e span').textContent = extra;
     log.prepend(li);
     while (log.children.length > 7) log.lastElementChild.remove();
   });
 
   // split simulator, using the real picker
-  ['A', 'B', 'C'].forEach((id) => {
+  ['A', 'B', 'C', 'D', 'E'].forEach((id) => {
     const input = document.getElementById('w' + id);
     input.addEventListener('input', () => {
       document.getElementById('o' + id).textContent = input.value + '%';
@@ -427,13 +453,14 @@ code { font: 500 12.5px var(--mono); background: var(--chip); padding: 1px 6px; 
   });
   document.getElementById('simulate').addEventListener('click', () => {
     const saved = C.weights;
-    C.weights = { A: +document.getElementById('wA').value, B: +document.getElementById('wB').value, C: +document.getElementById('wC').value };
-    const n = { A: 0, B: 0, C: 0 };
+    C.weights = {};
+    const n = {};
+    'ABCDE'.split('').forEach((id) => { C.weights[id] = +document.getElementById('w' + id).value; n[id] = 0; });
     for (let i = 0; i < 1000; i++) { const v = P.assign(); if (v) n[v]++; }
     C.weights = saved;
-    const max = Math.max(1, n.A, n.B, n.C);
+    const max = Math.max(1, ...Object.values(n));
     document.querySelectorAll('#bars > div').forEach((row, i) => {
-      const id = 'ABC'[i];
+      const id = 'ABCDE'[i];
       row.querySelector('.fill').style.width = (n[id] / max * 100) + '%';
       row.querySelector('em').textContent = n[id].toLocaleString();
     });

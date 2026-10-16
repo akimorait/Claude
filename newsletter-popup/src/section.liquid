@@ -28,7 +28,11 @@
     {
       "enabled": true,
       "experiment": {{ s.experiment | default: 'popup-test-1' | handleize | json }},
-      "weights": { "A": {{ s.weight_a | json }}, "B": {{ s.weight_b | json }}, "C": {{ s.weight_c | json }} },
+      "weights": {
+        "A": {{ s.weight_a | json }}, "B": {{ s.weight_b | json }}, "C": {{ s.weight_c | json }},
+        "D": {{ s.weight_d | json }}, "E": {{ s.weight_e | json }}
+      },
+      "gaId": {{ s.ga_id | strip | json }},
       "editorVariant": {{ s.editor_variant | json }},
       "designMode": {{ request.design_mode | json }},
       "suppress": {{ suppress | json }},
@@ -44,6 +48,44 @@
       "headlineB": {{ s.headline_b | json }},
       "headlineC": {{ s.headline_c | json }},
       "headlineC2": {{ s.headline_c2 | json }},
+      "headlineD": {{ s.headline_d | json }},
+      "headlineD2": {{ s.headline_d2 | json }},
+      "bodyD": {{ s.body_d | json }},
+      "headlineE": {{ s.headline_e | json }},
+      "buttonE": {{ s.button_e | json }},
+      "receipt": {{ s.receipt | json }},
+      "rooms": [
+        {%- for i in (1..4) -%}
+          {%- liquid
+            assign k = 'room_' | append: i
+            assign k_name = k | append: '_name'
+            assign k_mood = k | append: '_mood'
+            assign k_product = k | append: '_product'
+            assign room_product = s[k_product]
+            if room_product == blank
+              case i
+                when 1
+                  assign room_product = all_products['mocha-lamp']
+                when 2
+                  assign room_product = all_products['bubble-lamp-natural']
+                when 3
+                  assign room_product = all_products['limoncello-lamp']
+                when 4
+                  assign room_product = all_products['astro-pendant-lamp']
+              endcase
+            endif
+          -%}
+          {
+            "id": {{ s[k_name] | handleize | json }},
+            "name": {{ s[k_name] | json }},
+            "mood": {{ s[k_mood] | json }},
+            "product": {{ room_product.title | json }},
+            "price": {{ room_product.price | money | strip_html | json }},
+            "url": {{ room_product.url | json }},
+            "image": {% if room_product.featured_image %}{{ room_product.featured_image | image_url: width: 600 | json }}{% else %}""{% endif %}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ],
       "body": {{ s.body | json }},
       "offer": {{ s.offer | json }},
       "button": {{ s.button | json }},
@@ -81,9 +123,11 @@
       "type": "text", "id": "experiment", "label": "Test name", "default": "popup-test-1",
       "info": "Change this name to start a brand-new test. Every visitor is shuffled into a design again."
     },
-    { "type": "range", "id": "weight_a", "label": "Design A · Pocket Pop (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 34 },
-    { "type": "range", "id": "weight_b", "label": "Design B · Lights On (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 33 },
-    { "type": "range", "id": "weight_c", "label": "Design C · Colour Pick (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 33 },
+    { "type": "range", "id": "weight_a", "label": "Design A · Pocket Pop (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
+    { "type": "range", "id": "weight_b", "label": "Design B · Lights On (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
+    { "type": "range", "id": "weight_c", "label": "Design C · Colour Pick (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
+    { "type": "range", "id": "weight_d", "label": "Design D · Room Match (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
+    { "type": "range", "id": "weight_e", "label": "Design E · Print Job (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
     {
       "type": "paragraph",
       "content": "Set a design to 0 to switch it off. When you have a winner, set the other two to 0."
@@ -93,9 +137,15 @@
       "options": [
         { "value": "A", "label": "A · Pocket Pop" },
         { "value": "B", "label": "B · Lights On" },
-        { "value": "C", "label": "C · Colour Pick" }
+        { "value": "C", "label": "C · Colour Pick" },
+        { "value": "D", "label": "D · Room Match" },
+        { "value": "E", "label": "E · Print Job" }
       ],
       "default": "A"
+    },
+    {
+      "type": "text", "id": "ga_id", "label": "Google Analytics ID", "default": "G-6YMG5LFDHB",
+      "info": "Views, closes and sign-ups are sent here, named like popup_signup_b. Leave empty to send nothing."
     },
 
     { "type": "header", "content": "When it appears" },
@@ -126,6 +176,35 @@
     { "type": "text", "id": "marquee", "label": "Scrolling strip text (A)", "default": "new designs ✹ fresh colours ✹ early-bird specials ✹ made in melbourne ✹" },
     { "type": "text", "id": "button", "label": "Button", "default": "Join the list" },
     { "type": "text", "id": "fine", "label": "Small print", "default": "No spam. Unsubscribe anytime." },
+
+    { "type": "header", "content": "Design D · Room Match" },
+    { "type": "text", "id": "headline_d", "label": "Room question", "default": "Where's your next lamp going?" },
+    {
+      "type": "text", "id": "headline_d2", "label": "Headline after picking", "default": "[room] it is.",
+      "info": "[room] is swapped for the room they chose."
+    },
+    { "type": "textarea", "id": "body_d", "label": "Description after picking", "default": "Tell us the room and we'll send lamp ideas that suit it, plus first dibs on new designs." },
+    { "type": "text", "id": "room_1_name", "label": "Room 1", "default": "Living room" },
+    { "type": "text", "id": "room_1_mood", "label": "Room 1 mood", "default": "cosy & warm" },
+    { "type": "product", "id": "room_1_product", "label": "Room 1 lamp", "info": "Defaults to the Mocha Lamp." },
+    { "type": "text", "id": "room_2_name", "label": "Room 2", "default": "Bedroom" },
+    { "type": "text", "id": "room_2_mood", "label": "Room 2 mood", "default": "calm & soft" },
+    { "type": "product", "id": "room_2_product", "label": "Room 2 lamp", "info": "Defaults to the Bubble Lamp." },
+    { "type": "text", "id": "room_3_name", "label": "Room 3", "default": "Desk" },
+    { "type": "text", "id": "room_3_mood", "label": "Room 3 mood", "default": "bright & focused" },
+    { "type": "product", "id": "room_3_product", "label": "Room 3 lamp", "info": "Defaults to the Limoncello Lamp." },
+    { "type": "text", "id": "room_4_name", "label": "Room 4", "default": "Dining" },
+    { "type": "text", "id": "room_4_mood", "label": "Room 4 mood", "default": "moody glow" },
+    { "type": "product", "id": "room_4_product", "label": "Room 4 lamp", "info": "Defaults to the Astro Pendant Lamp." },
+
+    { "type": "header", "content": "Design E · Print Job" },
+    { "type": "text", "id": "headline_e", "label": "Headline", "default": "Print yourself $10 off." },
+    { "type": "text", "id": "button_e", "label": "Button", "default": "Start print" },
+    {
+      "type": "textarea", "id": "receipt", "label": "Receipt lines",
+      "default": "Item | $10 off\nMin. spend | $100\nMade in | Melbourne\nStatus | waiting on you",
+      "info": "One line each, written as: label | value"
+    },
 
     { "type": "header", "content": "After sign-up" },
     { "type": "text", "id": "success_title", "label": "Thank-you headline", "default": "You're on the list ✹" },

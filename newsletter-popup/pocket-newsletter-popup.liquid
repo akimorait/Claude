@@ -28,7 +28,11 @@
     {
       "enabled": true,
       "experiment": {{ s.experiment | default: 'popup-test-1' | handleize | json }},
-      "weights": { "A": {{ s.weight_a | json }}, "B": {{ s.weight_b | json }}, "C": {{ s.weight_c | json }} },
+      "weights": {
+        "A": {{ s.weight_a | json }}, "B": {{ s.weight_b | json }}, "C": {{ s.weight_c | json }},
+        "D": {{ s.weight_d | json }}, "E": {{ s.weight_e | json }}
+      },
+      "gaId": {{ s.ga_id | strip | json }},
       "editorVariant": {{ s.editor_variant | json }},
       "designMode": {{ request.design_mode | json }},
       "suppress": {{ suppress | json }},
@@ -44,6 +48,44 @@
       "headlineB": {{ s.headline_b | json }},
       "headlineC": {{ s.headline_c | json }},
       "headlineC2": {{ s.headline_c2 | json }},
+      "headlineD": {{ s.headline_d | json }},
+      "headlineD2": {{ s.headline_d2 | json }},
+      "bodyD": {{ s.body_d | json }},
+      "headlineE": {{ s.headline_e | json }},
+      "buttonE": {{ s.button_e | json }},
+      "receipt": {{ s.receipt | json }},
+      "rooms": [
+        {%- for i in (1..4) -%}
+          {%- liquid
+            assign k = 'room_' | append: i
+            assign k_name = k | append: '_name'
+            assign k_mood = k | append: '_mood'
+            assign k_product = k | append: '_product'
+            assign room_product = s[k_product]
+            if room_product == blank
+              case i
+                when 1
+                  assign room_product = all_products['mocha-lamp']
+                when 2
+                  assign room_product = all_products['bubble-lamp-natural']
+                when 3
+                  assign room_product = all_products['limoncello-lamp']
+                when 4
+                  assign room_product = all_products['astro-pendant-lamp']
+              endcase
+            endif
+          -%}
+          {
+            "id": {{ s[k_name] | handleize | json }},
+            "name": {{ s[k_name] | json }},
+            "mood": {{ s[k_mood] | json }},
+            "product": {{ room_product.title | json }},
+            "price": {{ room_product.price | money | strip_html | json }},
+            "url": {{ room_product.url | json }},
+            "image": {% if room_product.featured_image %}{{ room_product.featured_image | image_url: width: 600 | json }}{% else %}""{% endif %}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ],
       "body": {{ s.body | json }},
       "offer": {{ s.offer | json }},
       "button": {{ s.button | json }},
@@ -455,6 +497,144 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 .ppp-c .ppp__body { font-size: 13px; }
 .ppp-c .ppp__done .ppp__title { font-size: 26px; }
 
+/* ---------- D · Room Match ---------- */
+.ppp--d, .ppp--e { display: grid; place-items: center; padding: 24px; }
+.ppp-d { width: min(820px, 100%); padding: 34px 34px 30px; }
+.ppp-d .ppp__title { padding-right: 40px; }
+.ppp-d__step { display: flex; flex-direction: column; gap: 14px; }
+.ppp-d__rooms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 6px; }
+.ppp-d__room {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--pp-cream);
+  color: var(--pp-ink);
+  text-align: left;
+}
+.ppp-d__room img {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+  object-fit: cover; transition: transform 0.5s var(--pp-ease);
+}
+.ppp-d__room:hover img { transform: scale(1.06); }
+.ppp-d__room:focus-visible { outline: 3px solid var(--pp-ink); outline-offset: 3px; }
+.ppp.is-open .ppp-d__room { animation: ppp-rise 0.5s var(--pp-ease) both; }
+.ppp-d__room:nth-child(2) { animation-delay: 0.06s !important; }
+.ppp-d__room:nth-child(3) { animation-delay: 0.12s !important; }
+.ppp-d__room:nth-child(4) { animation-delay: 0.18s !important; }
+@keyframes ppp-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.ppp-d__label {
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  display: flex; flex-direction: column; gap: 1px;
+  padding: 8px 10px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.94);
+}
+.ppp-d__label b { font: 700 14px/1.2 var(--pp-head); }
+.ppp-d__label small { font: 400 10.5px var(--pp-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--pp-muted); }
+.ppp-d__match { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 28px; align-items: center; }
+.ppp-d__pick {
+  position: relative; margin: 0; aspect-ratio: 4 / 5; max-width: 100%;
+  border-radius: 20px; overflow: hidden; background: var(--pp-cream);
+}
+.ppp-d__pick img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; }
+.ppp-d__pick figcaption {
+  position: absolute; left: 12px; bottom: 12px; right: 12px;
+  display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 0 10px;
+  padding: 10px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.95);
+}
+.ppp-d__pick small { grid-column: 1 / -1; font: 700 10px var(--pp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--pp-dot1); }
+.ppp-d__pick b { font: 700 16px/1.25 var(--pp-head); }
+.ppp-d__pick span { font: 400 13px var(--pp-mono); }
+.ppp-d__form { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ppp-d .ppp-c__chosen i { background-size: cover; background-position: center; background-color: var(--pp-cream); }
+.ppp-d .ppp__done { padding: 6px 4px; }
+
+/* ---------- E · Print Job ---------- */
+.ppp--e { place-items: start center; padding: 0 16px; }
+.ppp__scrim--light { background: rgba(29, 28, 28, 0.3); }
+.ppp-e__wrap {
+  position: relative;
+  width: min(390px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 100%;
+}
+.ppp-e__head {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border-radius: 0 0 20px 20px;
+  background: var(--pp-ink);
+  color: var(--pp-label);
+  font: 500 10.5px var(--pp-mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: auto;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.5), inset 0 -5px 0 #000;
+  transform: translateY(-100%);
+  transition: transform 0.4s var(--pp-ease);
+}
+.ppp.is-open .ppp-e__head { transform: none; }
+.ppp-e__head i { width: 8px; height: 8px; border-radius: 50%; background: var(--pp-orange); box-shadow: 0 0 0 3px var(--pp-halo); animation: ppp-blink 1.2s steps(2) infinite; }
+@keyframes ppp-blink { 50% { opacity: 0.35; } }
+.ppp-e {
+  width: calc(100% - 24px);
+  margin-top: -6px;
+  padding: 30px 24px 30px;
+  border-radius: 0;
+  background: #fffdf8;
+  overflow: visible;
+  max-height: none;
+  opacity: 1;
+  transform: translateY(-100%);
+  transition: transform 1.4s steps(16, end) 0.3s;
+  box-shadow: 0 26px 50px -22px rgba(29, 28, 28, 0.5);
+}
+.ppp.is-open .ppp-e { transform: none; }
+.ppp.is-closing .ppp-e { transition: transform 0.25s ease; transform: translateY(-110%); }
+.ppp-e .ppp__x { top: 12px; right: 12px; width: 32px; height: 32px; }
+.ppp-e__tear {
+  position: absolute; left: 0; right: 0; bottom: -8px; height: 8px;
+  background:
+    linear-gradient(135deg, #fffdf8 50%, transparent 50%) 0 0 / 12px 12px repeat-x,
+    linear-gradient(225deg, #fffdf8 50%, transparent 50%) 0 0 / 12px 12px repeat-x;
+}
+.ppp-e__job {
+  margin: 0; padding-bottom: 12px; border-bottom: 1.5px dashed var(--pp-ink);
+  font: 700 11px var(--pp-mono); letter-spacing: 0.18em; text-transform: uppercase;
+}
+.ppp-e .ppp__title { font-size: 28px; padding-right: 20px; }
+.ppp-e__rows {
+  margin: 0; padding: 12px 0; display: flex; flex-direction: column; gap: 6px;
+  border-top: 1.5px dashed var(--pp-ink); border-bottom: 1.5px dashed var(--pp-ink);
+  font: 400 13px var(--pp-mono);
+}
+.ppp-e__rows div { display: flex; justify-content: space-between; gap: 12px; }
+.ppp-e__rows dt { color: var(--pp-muted); letter-spacing: 0.1em; text-transform: uppercase; font-size: 11.5px; padding-top: 1px; }
+.ppp-e__rows dd { margin: 0; font-weight: 700; text-align: right; }
+.ppp-e .ppp__input {
+  height: 46px; padding: 0 2px; border: 0; border-bottom: 1.5px solid var(--pp-ink);
+  border-radius: 0; background: transparent;
+}
+.ppp-e .ppp__input:focus { box-shadow: none; border-bottom-color: var(--pp-orange-deep); }
+.ppp-e__progress { display: flex; flex-direction: column; gap: 8px; padding: 10px 0 4px; }
+.ppp-e__bar { display: block; height: 16px; border: 1.5px solid var(--pp-ink); border-radius: 999px; overflow: hidden; }
+.ppp-e__bar i {
+  display: block; height: 100%; width: 0;
+  background: repeating-linear-gradient(90deg, var(--pp-orange) 0 6px, var(--pp-orange-deep) 6px 8px);
+}
+.ppp-e__pct { font: 700 11px var(--pp-mono); letter-spacing: 0.16em; text-transform: uppercase; }
+
 /* ---------- minimised tab ---------- */
 .ppp-tab {
   position: absolute;
@@ -505,6 +685,15 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 .ppp-tab button:focus-visible { outline: 2px solid var(--pp-ink); outline-offset: 2px; border-radius: 999px; }
 
 /* ---------- small screens (class set by script from the real width) ---------- */
+.ppp--compact.ppp--d { padding: 16px; }
+.ppp--compact .ppp-d { padding: 26px 20px 22px; }
+.ppp--compact .ppp-d__rooms { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.ppp--compact .ppp-d__room { aspect-ratio: 1; }
+.ppp--compact .ppp-d__match { grid-template-columns: 1fr; gap: 16px; }
+.ppp--compact .ppp-d__pick { aspect-ratio: 16 / 9; }
+.ppp--compact .ppp-d .ppp__x { background: rgba(255, 255, 255, 0.92); box-shadow: 0 2px 8px rgba(29, 28, 28, 0.2); }
+.ppp--compact.ppp--e { padding: 0 10px; }
+.ppp--compact .ppp-e .ppp__title { font-size: 25px; }
 .ppp--compact.ppp--a, .ppp--compact.ppp--b { padding: 16px; }
 .ppp--compact .ppp__title { font-size: 28px; }
 .ppp--compact .ppp-a .ppp__inner { padding: 24px 22px 26px; }
@@ -536,7 +725,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ppp__card, .ppp__scrim, .ppp-tab { transition: opacity 0.15s linear; transform: none !important; }
+  .ppp__card, .ppp__scrim, .ppp-tab, .ppp-e__head { transition: opacity 0.15s linear; transform: none !important; }
   .ppp-a__track { animation: none; }
   .ppp *, .ppp *::before { animation-duration: 0.001s !important; animation-delay: 0s !important; }
 }
@@ -549,6 +738,8 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
  *   A  Pocket Pop   centred card with the cream marquee band and logo dots
  *   B  Lights On    split card, lamp photo flickers on as it opens
  *   C  Colour Pick  corner card that asks for a favourite colour first
+ *   D  Room Match   pick the room it's for, get a matching lamp, then sign up
+ *   E  Print Job    a receipt that prints down from the top of the screen
  *
  * Each visitor is given one design (weighted random), keeps it on every visit,
  * and every view / close / sign-up is reported with that design's letter.
@@ -564,8 +755,8 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   // The theme editor re-runs this script whenever a setting changes.
   if (window.PocketPopup && window.PocketPopup.destroy) window.PocketPopup.destroy();
 
-  const VARIANTS = ['A', 'B', 'C'];
-  const MODAL = { A: true, B: true, C: false };
+  const VARIANTS = ['A', 'B', 'C', 'D', 'E'];
+  const MODAL = { A: true, B: true, C: false, D: true, E: true };
   const COLOURS = C.colours || [
     { id: 'lemon', name: 'Lemon', hex: '#F5D04C' },
     { id: 'candy', name: 'Candy', hex: '#F2A6B8' },
@@ -575,6 +766,19 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     { id: 'spearmint', name: 'Spearmint', hex: '#9ED3B8' },
     { id: 'maple', name: 'Maple', hex: '#B9773F' },
   ];
+
+  const ROOMS = (C.rooms || []).filter((r) => r && r.name);
+
+  function jobNumber() {
+    const digits = String(C.code || '').replace(/\D/g, '');
+    return digits.slice(-4) || '0001';
+  }
+
+  function receiptRows() {
+    return String(C.receipt || '').split('\n').map((line) => line.split('|'))
+      .filter((p) => p.length === 2 && p[0].trim())
+      .map((p) => `<div><dt>${esc(p[0].trim())}</dt><dd>${esc(p[1].trim())}</dd></div>`).join('');
+  }
 
   const experiment = String(C.experiment || 'popup-test-1');
   const K = {
@@ -596,7 +800,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   let root = null;
   let tab = null;
   let variant = null;
-  let colour = null;
+  let choice = null; // { kind: 'colour' | 'room', id }
   let lastFocus = null;
   const cleanups = [];
 
@@ -612,7 +816,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   }
 
   function forcedVariant() {
-    const m = location.search.match(/[?&]pp_popup=([abc])\b/i);
+    const m = location.search.match(/[?&]pp_popup=([a-e])\b/i);
     return m ? m[1].toUpperCase() : null;
   }
 
@@ -643,7 +847,14 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       return;
     }
     if (C.designMode) return;
-    try { if (typeof window.gtag === 'function') window.gtag('event', name, params); } catch (e) { /* ignore */ }
+    // The design letter goes in the event name (popup_signup_b) so reports can
+    // split by design without any Google Analytics setup.
+    try {
+      if (typeof window.gtag === 'function') {
+        const gaParams = C.gaId ? Object.assign({ send_to: C.gaId }, params) : params;
+        window.gtag('event', name + '_' + String(variant).toLowerCase(), gaParams);
+      }
+    } catch (e) { /* ignore */ }
     try {
       const a = window.Shopify && window.Shopify.analytics;
       if (a && typeof a.publish === 'function') a.publish(name, params);
@@ -658,12 +869,12 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   const eyebrow = () => (C.eyebrow ? `<p class="ppp__eyebrow">${esc(C.eyebrow)}</p>` : '');
   const offer = () => (C.offer ? `<p class="ppp__offer"><span aria-hidden="true">✹</span>${esc(C.offer)}</p>` : '');
 
-  function formHTML() {
+  function formHTML(label) {
     return `<form class="ppp__form" novalidate>
         <label class="ppp__sr" for="ppp-email">Email address</label>
         <input id="ppp-email" class="ppp__input" type="email" name="email" autocomplete="email"
           inputmode="email" placeholder="${esc(C.placeholder || 'your@email.com')}" required>
-        <button class="ppp__btn" type="submit">${esc(C.button || 'Join the list')}</button>
+        <button class="ppp__btn" type="submit">${esc(label || C.button || 'Join the list')}</button>
         <p class="ppp__err" role="alert" hidden></p>
         ${C.fine ? `<p class="ppp__fine">${esc(C.fine)}</p>` : ''}
       </form>`;
@@ -758,6 +969,58 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
         </div>
         ${doneHTML()}
       </div>`,
+
+    D: () => `
+      <div class="ppp__scrim" data-close="scrim"></div>
+      <div class="ppp__card ppp-d" role="dialog" aria-modal="true" aria-labelledby="ppp-title" tabindex="-1">
+        ${closeBtn}
+        <div class="ppp__main">
+          <div class="ppp-d__step" data-step="pick">
+            ${eyebrow()}
+            <h2 class="ppp__title" id="ppp-title">${esc(C.headlineD)}</h2>
+            <div class="ppp-d__rooms" role="group" aria-label="Rooms">
+              ${ROOMS.map((r, i) => `<button type="button" class="ppp-d__room" data-room="${i}">
+                  ${r.image ? `<img src="${esc(r.image)}" alt="" loading="lazy" decoding="async">` : ''}
+                  <span class="ppp-d__label"><b>${esc(r.name)}</b><small>${esc(r.mood)}</small></span>
+                </button>`).join('')}
+            </div>
+          </div>
+          <div class="ppp-d__step ppp-d__match" data-step="form" hidden>
+            <figure class="ppp-d__pick">
+              <img alt="" decoding="async">
+              <figcaption><small>Our pick</small><b></b><span></span></figcaption>
+            </figure>
+            <div class="ppp-d__form">
+              <button type="button" class="ppp-c__chosen" data-back><i></i><span></span><small>change</small></button>
+              <h2 class="ppp__title ppp-d__title2" tabindex="-1"></h2>
+              <p class="ppp__body">${esc(C.bodyD || C.body)}</p>
+              ${offer()}
+              ${formHTML()}
+            </div>
+          </div>
+        </div>
+        ${doneHTML()}
+      </div>`,
+
+    E: () => `
+      <div class="ppp__scrim ppp__scrim--light" data-close="scrim"></div>
+      <div class="ppp-e__wrap">
+        <div class="ppp-e__head" aria-hidden="true"><i></i><span>${esc(C.printerName || 'pocket-01 · melbourne')}</span></div>
+        <div class="ppp__card ppp-e" role="dialog" aria-modal="true" aria-labelledby="ppp-title" tabindex="-1">
+          ${closeBtn}
+          <div class="ppp__main">
+            <p class="ppp-e__job">Print job #${esc(jobNumber())}</p>
+            <h2 class="ppp__title" id="ppp-title">${esc(C.headlineE)}</h2>
+            <dl class="ppp-e__rows">${receiptRows()}</dl>
+            ${formHTML(C.buttonE)}
+            <div class="ppp-e__progress" hidden aria-hidden="true">
+              <span class="ppp-e__bar"><i></i></span><span class="ppp-e__pct">printing 0%</span>
+            </div>
+          </div>
+          ${doneHTML()}
+          <div class="ppp-e__tear" aria-hidden="true"></div>
+        </div>
+      </div>`,
   };
 
   /* ---------- open / close ---------- */
@@ -775,7 +1038,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     if (root) close(null);
     hideTab();
     variant = v;
-    colour = null;
+    choice = null;
     lastFocus = document.activeElement;
 
     root = document.createElement('div');
@@ -872,9 +1135,10 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 
   function wire(el) {
     el.addEventListener('click', (e) => {
-      const t = e.target.closest('[data-close],[data-colour],[data-back],[data-copy]');
+      const t = e.target.closest('[data-close],[data-colour],[data-room],[data-back],[data-copy]');
       if (!t) return;
       if (t.dataset.close) close(t.dataset.close);
+      else if (t.dataset.room) pickRoom(Number(t.dataset.room));
       else if (t.dataset.colour) pickColour(t.dataset.colour, t.dataset.name, t.style.getPropertyValue('--sw'));
       else if (t.hasAttribute('data-back')) stepTo('pick');
       else if (t.dataset.copy) copyCode(t);
@@ -884,13 +1148,15 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   }
 
   function stepTo(step) {
-    root.querySelectorAll('.ppp-c__step').forEach((s) => { s.hidden = s.dataset.step !== step; });
-    const focusEl = step === 'form' ? root.querySelector('.ppp-c__title2') : root.querySelector('.ppp-c__sw');
+    root.querySelectorAll('[data-step]').forEach((s) => { s.hidden = s.dataset.step !== step; });
+    const focusEl = step === 'form'
+      ? root.querySelector('.ppp-c__title2, .ppp-d__title2')
+      : root.querySelector('.ppp-c__sw, .ppp-d__room');
     if (focusEl) focusEl.focus({ preventScroll: true });
   }
 
   function pickColour(id, name, hex) {
-    colour = id;
+    choice = { kind: 'colour', id };
     const card = root.querySelector('.ppp-c');
     const chip = root.querySelector('.ppp-c__chosen');
     card.style.setProperty('--pick', hex || 'transparent');
@@ -900,7 +1166,31 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       ? (C.headlineCAll || 'Can’t pick just one? Fair.')
       : String(C.headlineC2 || 'Good pick. [colour] it is.').replace(/\[colou?r\]/gi, name);
     root.querySelector('.ppp-c__title2').textContent = headline;
-    track('popup_colour', { popup_colour: id });
+    track('popup_choice', { popup_choice: id });
+    stepTo('form');
+  }
+
+  function pickRoom(i) {
+    const r = ROOMS[i];
+    if (!r) return;
+    choice = { kind: 'room', id: r.id };
+    const pick = root.querySelector('.ppp-d__pick');
+    const img = pick.querySelector('img');
+    if (r.image) { img.src = r.image; img.hidden = false; } else { img.hidden = true; }
+    pick.querySelector('b').textContent = r.product || '';
+    pick.querySelector('span').textContent = r.price || '';
+    const chip = root.querySelector('.ppp-d__form .ppp-c__chosen');
+    chip.querySelector('span').textContent = r.name;
+    chip.querySelector('i').style.backgroundImage = r.image ? `url("${r.image.replace(/"/g, '%22')}")` : '';
+    root.querySelector('.ppp-d__title2').textContent =
+      String(C.headlineD2 || '[room] it is.').replace(/\[room\]/gi, r.name);
+    // Point the thank-you button at the matching lamp.
+    const shop = root.querySelector('.ppp__btn--link');
+    if (shop && r.url) {
+      shop.href = r.url;
+      if (r.product) shop.textContent = 'Shop the ' + r.product;
+    }
+    track('popup_choice', { popup_choice: r.id });
     stepTo('form');
   }
 
@@ -921,7 +1211,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 
   function tagsFor() {
     const tags = ['newsletter', 'popup', 'popup-' + variant, experiment];
-    if (colour) tags.push('colour-' + colour);
+    if (choice) tags.push(choice.kind + '-' + choice.id);
     String(C.extraTags || '').split(',').map((t) => t.trim()).filter(Boolean).forEach((t) => tags.push(t));
     return tags.join(',');
   }
@@ -955,7 +1245,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     if (!f) return false;
     f.querySelector('[name="contact[email]"]').value = email;
     f.querySelector('[name="contact[tags]"]').value = tags;
-    store.set(K.pending, JSON.stringify({ v: variant, c: colour || 'none' }));
+    store.set(K.pending, JSON.stringify({ v: variant, c: choice ? choice.id : 'none' }));
     f.submit();
     return true;
   }
@@ -985,8 +1275,9 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     const result = await send(email, tags);
 
     if (result === 'ok') {
+      if (variant === 'E') await printOut(form);
       if (persist) store.set(K.joined, '1');
-      track('popup_signup', { popup_colour: colour || 'none' });
+      track('popup_signup', { popup_choice: choice ? choice.id : 'none' });
       showDone();
     } else if (result === 'native' && nativeSubmit(email, tags)) {
       // page is navigating away
@@ -996,6 +1287,29 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       err.textContent = C.errNetwork || 'Couldn’t sign you up just now. Try again in a moment.';
       err.hidden = false;
     }
+  }
+
+  // Design E: a short "printing" progress bar before the code appears.
+  function printOut(form) {
+    const box = root && root.querySelector('.ppp-e__progress');
+    if (!box) return Promise.resolve();
+    form.hidden = true;
+    box.hidden = false;
+    const bar = box.querySelector('i');
+    const pct = box.querySelector('.ppp-e__pct');
+    const total = reduceMotion ? 1 : 1400;
+    const start = performance.now();
+    return new Promise((resolve) => {
+      const step = (t) => {
+        const k = Math.min(1, (t - start) / total);
+        const n = Math.round(k * 100);
+        bar.style.width = n + '%';
+        pct.textContent = k < 1 ? 'printing ' + n + '%' : 'done';
+        if (k < 1) requestAnimationFrame(step);
+        else setTimeout(resolve, reduceMotion ? 0 : 250);
+      };
+      requestAnimationFrame(step);
+    });
   }
 
   function onKey(e) {
@@ -1090,7 +1404,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       try { p = JSON.parse(pending); } catch (e) { /* ignore */ }
       if (TEMPLATES[p.v]) {
         open(p.v, { silent: true, success: true });
-        track('popup_signup', { popup_colour: p.c || 'none' });
+        track('popup_signup', { popup_choice: p.c || 'none' });
       }
       return;
     }
@@ -1125,9 +1439,11 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       "type": "text", "id": "experiment", "label": "Test name", "default": "popup-test-1",
       "info": "Change this name to start a brand-new test. Every visitor is shuffled into a design again."
     },
-    { "type": "range", "id": "weight_a", "label": "Design A · Pocket Pop (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 34 },
-    { "type": "range", "id": "weight_b", "label": "Design B · Lights On (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 33 },
-    { "type": "range", "id": "weight_c", "label": "Design C · Colour Pick (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 33 },
+    { "type": "range", "id": "weight_a", "label": "Design A · Pocket Pop (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
+    { "type": "range", "id": "weight_b", "label": "Design B · Lights On (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
+    { "type": "range", "id": "weight_c", "label": "Design C · Colour Pick (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
+    { "type": "range", "id": "weight_d", "label": "Design D · Room Match (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
+    { "type": "range", "id": "weight_e", "label": "Design E · Print Job (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
     {
       "type": "paragraph",
       "content": "Set a design to 0 to switch it off. When you have a winner, set the other two to 0."
@@ -1137,9 +1453,15 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       "options": [
         { "value": "A", "label": "A · Pocket Pop" },
         { "value": "B", "label": "B · Lights On" },
-        { "value": "C", "label": "C · Colour Pick" }
+        { "value": "C", "label": "C · Colour Pick" },
+        { "value": "D", "label": "D · Room Match" },
+        { "value": "E", "label": "E · Print Job" }
       ],
       "default": "A"
+    },
+    {
+      "type": "text", "id": "ga_id", "label": "Google Analytics ID", "default": "G-6YMG5LFDHB",
+      "info": "Views, closes and sign-ups are sent here, named like popup_signup_b. Leave empty to send nothing."
     },
 
     { "type": "header", "content": "When it appears" },
@@ -1170,6 +1492,35 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     { "type": "text", "id": "marquee", "label": "Scrolling strip text (A)", "default": "new designs ✹ fresh colours ✹ early-bird specials ✹ made in melbourne ✹" },
     { "type": "text", "id": "button", "label": "Button", "default": "Join the list" },
     { "type": "text", "id": "fine", "label": "Small print", "default": "No spam. Unsubscribe anytime." },
+
+    { "type": "header", "content": "Design D · Room Match" },
+    { "type": "text", "id": "headline_d", "label": "Room question", "default": "Where's your next lamp going?" },
+    {
+      "type": "text", "id": "headline_d2", "label": "Headline after picking", "default": "[room] it is.",
+      "info": "[room] is swapped for the room they chose."
+    },
+    { "type": "textarea", "id": "body_d", "label": "Description after picking", "default": "Tell us the room and we'll send lamp ideas that suit it, plus first dibs on new designs." },
+    { "type": "text", "id": "room_1_name", "label": "Room 1", "default": "Living room" },
+    { "type": "text", "id": "room_1_mood", "label": "Room 1 mood", "default": "cosy & warm" },
+    { "type": "product", "id": "room_1_product", "label": "Room 1 lamp", "info": "Defaults to the Mocha Lamp." },
+    { "type": "text", "id": "room_2_name", "label": "Room 2", "default": "Bedroom" },
+    { "type": "text", "id": "room_2_mood", "label": "Room 2 mood", "default": "calm & soft" },
+    { "type": "product", "id": "room_2_product", "label": "Room 2 lamp", "info": "Defaults to the Bubble Lamp." },
+    { "type": "text", "id": "room_3_name", "label": "Room 3", "default": "Desk" },
+    { "type": "text", "id": "room_3_mood", "label": "Room 3 mood", "default": "bright & focused" },
+    { "type": "product", "id": "room_3_product", "label": "Room 3 lamp", "info": "Defaults to the Limoncello Lamp." },
+    { "type": "text", "id": "room_4_name", "label": "Room 4", "default": "Dining" },
+    { "type": "text", "id": "room_4_mood", "label": "Room 4 mood", "default": "moody glow" },
+    { "type": "product", "id": "room_4_product", "label": "Room 4 lamp", "info": "Defaults to the Astro Pendant Lamp." },
+
+    { "type": "header", "content": "Design E · Print Job" },
+    { "type": "text", "id": "headline_e", "label": "Headline", "default": "Print yourself $10 off." },
+    { "type": "text", "id": "button_e", "label": "Button", "default": "Start print" },
+    {
+      "type": "textarea", "id": "receipt", "label": "Receipt lines",
+      "default": "Item | $10 off\nMin. spend | $100\nMade in | Melbourne\nStatus | waiting on you",
+      "info": "One line each, written as: label | value"
+    },
 
     { "type": "header", "content": "After sign-up" },
     { "type": "text", "id": "success_title", "label": "Thank-you headline", "default": "You're on the list ✹" },

@@ -56,7 +56,7 @@ h1 { margin: 0; font: 700 clamp(34px, 5vw, 52px)/1.02 var(--display); letter-spa
 .top p { margin: 0; color: var(--muted); }
 
 /* direction picker */
-.picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
 .dir {
   display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: start;
   padding: 16px 18px; text-align: left; cursor: pointer;
@@ -586,6 +586,144 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 .ppp-c .ppp__body { font-size: 13px; }
 .ppp-c .ppp__done .ppp__title { font-size: 26px; }
 
+/* ---------- D · Room Match ---------- */
+.ppp--d, .ppp--e { display: grid; place-items: center; padding: 24px; }
+.ppp-d { width: min(820px, 100%); padding: 34px 34px 30px; }
+.ppp-d .ppp__title { padding-right: 40px; }
+.ppp-d__step { display: flex; flex-direction: column; gap: 14px; }
+.ppp-d__rooms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 6px; }
+.ppp-d__room {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--pp-cream);
+  color: var(--pp-ink);
+  text-align: left;
+}
+.ppp-d__room img {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+  object-fit: cover; transition: transform 0.5s var(--pp-ease);
+}
+.ppp-d__room:hover img { transform: scale(1.06); }
+.ppp-d__room:focus-visible { outline: 3px solid var(--pp-ink); outline-offset: 3px; }
+.ppp.is-open .ppp-d__room { animation: ppp-rise 0.5s var(--pp-ease) both; }
+.ppp-d__room:nth-child(2) { animation-delay: 0.06s !important; }
+.ppp-d__room:nth-child(3) { animation-delay: 0.12s !important; }
+.ppp-d__room:nth-child(4) { animation-delay: 0.18s !important; }
+@keyframes ppp-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.ppp-d__label {
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  display: flex; flex-direction: column; gap: 1px;
+  padding: 8px 10px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.94);
+}
+.ppp-d__label b { font: 700 14px/1.2 var(--pp-head); }
+.ppp-d__label small { font: 400 10.5px var(--pp-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--pp-muted); }
+.ppp-d__match { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 28px; align-items: center; }
+.ppp-d__pick {
+  position: relative; margin: 0; aspect-ratio: 4 / 5; max-width: 100%;
+  border-radius: 20px; overflow: hidden; background: var(--pp-cream);
+}
+.ppp-d__pick img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; }
+.ppp-d__pick figcaption {
+  position: absolute; left: 12px; bottom: 12px; right: 12px;
+  display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 0 10px;
+  padding: 10px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.95);
+}
+.ppp-d__pick small { grid-column: 1 / -1; font: 700 10px var(--pp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--pp-dot1); }
+.ppp-d__pick b { font: 700 16px/1.25 var(--pp-head); }
+.ppp-d__pick span { font: 400 13px var(--pp-mono); }
+.ppp-d__form { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ppp-d .ppp-c__chosen i { background-size: cover; background-position: center; background-color: var(--pp-cream); }
+.ppp-d .ppp__done { padding: 6px 4px; }
+
+/* ---------- E · Print Job ---------- */
+.ppp--e { place-items: start center; padding: 0 16px; }
+.ppp__scrim--light { background: rgba(29, 28, 28, 0.3); }
+.ppp-e__wrap {
+  position: relative;
+  width: min(390px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 100%;
+}
+.ppp-e__head {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border-radius: 0 0 20px 20px;
+  background: var(--pp-ink);
+  color: var(--pp-label);
+  font: 500 10.5px var(--pp-mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: auto;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.5), inset 0 -5px 0 #000;
+  transform: translateY(-100%);
+  transition: transform 0.4s var(--pp-ease);
+}
+.ppp.is-open .ppp-e__head { transform: none; }
+.ppp-e__head i { width: 8px; height: 8px; border-radius: 50%; background: var(--pp-orange); box-shadow: 0 0 0 3px var(--pp-halo); animation: ppp-blink 1.2s steps(2) infinite; }
+@keyframes ppp-blink { 50% { opacity: 0.35; } }
+.ppp-e {
+  width: calc(100% - 24px);
+  margin-top: -6px;
+  padding: 30px 24px 30px;
+  border-radius: 0;
+  background: #fffdf8;
+  overflow: visible;
+  max-height: none;
+  opacity: 1;
+  transform: translateY(-100%);
+  transition: transform 1.4s steps(16, end) 0.3s;
+  box-shadow: 0 26px 50px -22px rgba(29, 28, 28, 0.5);
+}
+.ppp.is-open .ppp-e { transform: none; }
+.ppp.is-closing .ppp-e { transition: transform 0.25s ease; transform: translateY(-110%); }
+.ppp-e .ppp__x { top: 12px; right: 12px; width: 32px; height: 32px; }
+.ppp-e__tear {
+  position: absolute; left: 0; right: 0; bottom: -8px; height: 8px;
+  background:
+    linear-gradient(135deg, #fffdf8 50%, transparent 50%) 0 0 / 12px 12px repeat-x,
+    linear-gradient(225deg, #fffdf8 50%, transparent 50%) 0 0 / 12px 12px repeat-x;
+}
+.ppp-e__job {
+  margin: 0; padding-bottom: 12px; border-bottom: 1.5px dashed var(--pp-ink);
+  font: 700 11px var(--pp-mono); letter-spacing: 0.18em; text-transform: uppercase;
+}
+.ppp-e .ppp__title { font-size: 28px; padding-right: 20px; }
+.ppp-e__rows {
+  margin: 0; padding: 12px 0; display: flex; flex-direction: column; gap: 6px;
+  border-top: 1.5px dashed var(--pp-ink); border-bottom: 1.5px dashed var(--pp-ink);
+  font: 400 13px var(--pp-mono);
+}
+.ppp-e__rows div { display: flex; justify-content: space-between; gap: 12px; }
+.ppp-e__rows dt { color: var(--pp-muted); letter-spacing: 0.1em; text-transform: uppercase; font-size: 11.5px; padding-top: 1px; }
+.ppp-e__rows dd { margin: 0; font-weight: 700; text-align: right; }
+.ppp-e .ppp__input {
+  height: 46px; padding: 0 2px; border: 0; border-bottom: 1.5px solid var(--pp-ink);
+  border-radius: 0; background: transparent;
+}
+.ppp-e .ppp__input:focus { box-shadow: none; border-bottom-color: var(--pp-orange-deep); }
+.ppp-e__progress { display: flex; flex-direction: column; gap: 8px; padding: 10px 0 4px; }
+.ppp-e__bar { display: block; height: 16px; border: 1.5px solid var(--pp-ink); border-radius: 999px; overflow: hidden; }
+.ppp-e__bar i {
+  display: block; height: 100%; width: 0;
+  background: repeating-linear-gradient(90deg, var(--pp-orange) 0 6px, var(--pp-orange-deep) 6px 8px);
+}
+.ppp-e__pct { font: 700 11px var(--pp-mono); letter-spacing: 0.16em; text-transform: uppercase; }
+
 /* ---------- minimised tab ---------- */
 .ppp-tab {
   position: absolute;
@@ -636,6 +774,15 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 .ppp-tab button:focus-visible { outline: 2px solid var(--pp-ink); outline-offset: 2px; border-radius: 999px; }
 
 /* ---------- small screens (class set by script from the real width) ---------- */
+.ppp--compact.ppp--d { padding: 16px; }
+.ppp--compact .ppp-d { padding: 26px 20px 22px; }
+.ppp--compact .ppp-d__rooms { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.ppp--compact .ppp-d__room { aspect-ratio: 1; }
+.ppp--compact .ppp-d__match { grid-template-columns: 1fr; gap: 16px; }
+.ppp--compact .ppp-d__pick { aspect-ratio: 16 / 9; }
+.ppp--compact .ppp-d .ppp__x { background: rgba(255, 255, 255, 0.92); box-shadow: 0 2px 8px rgba(29, 28, 28, 0.2); }
+.ppp--compact.ppp--e { padding: 0 10px; }
+.ppp--compact .ppp-e .ppp__title { font-size: 25px; }
 .ppp--compact.ppp--a, .ppp--compact.ppp--b { padding: 16px; }
 .ppp--compact .ppp__title { font-size: 28px; }
 .ppp--compact .ppp-a .ppp__inner { padding: 24px 22px 26px; }
@@ -667,7 +814,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ppp__card, .ppp__scrim, .ppp-tab { transition: opacity 0.15s linear; transform: none !important; }
+  .ppp__card, .ppp__scrim, .ppp-tab, .ppp-e__head { transition: opacity 0.15s linear; transform: none !important; }
   .ppp-a__track { animation: none; }
   .ppp *, .ppp *::before { animation-duration: 0.001s !important; animation-delay: 0s !important; }
 }
@@ -677,13 +824,15 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   <header class="top">
     <div class="brand"><span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Pocket Picked It · newsletter popup</div>
     <h1>Pick your popup.</h1>
-    <p>Three designs built from your site's fonts, colours and halo buttons. All three can run at once in an A/B test, and the one that turns the most visitors into subscribers wins. Click a design to see it on your homepage.</p>
+    <p>Five designs built from your site's fonts, colours and halo buttons. They can all run at once in an A/B test, and the one that turns the most visitors into subscribers wins. Click a design to see it on your homepage.</p>
   </header>
 
   <div class="picker" role="tablist" aria-label="Design directions">
     <button class="dir" role="tab" id="dir-A" data-v="A" aria-selected="true"><b>A</b><strong>Pocket Pop</strong><span>Your homepage in a card: the cream scrolling strip, the four logo dots and the orange halo button.</span></button>
     <button class="dir" role="tab" id="dir-B" data-v="B" aria-selected="false"><b>B</b><strong>Lights On</strong><span>A lamp photo that flickers on as the popup opens, next to a warm cream panel.</span></button>
     <button class="dir" role="tab" id="dir-C" data-v="C" aria-selected="false"><b>C</b><strong>Colour Pick</strong><span>A small corner card that asks for a favourite colour first, then the email.</span></button>
+    <button class="dir" role="tab" id="dir-D" data-v="D" aria-selected="false"><b>D</b><strong>Room Match</strong><span>Visitors pick the room it's for and get a matching lamp, then sign up.</span></button>
+    <button class="dir" role="tab" id="dir-E" data-v="E" aria-selected="false"><b>E</b><strong>Print Job</strong><span>A receipt prints down from the top of the screen, like your 3D printers.</span></button>
   </div>
 
   <div class="bar">
@@ -756,21 +905,25 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       <h2>How the A/B test works</h2>
       <ol class="steps">
         <li><p><strong>Each new visitor gets one design.</strong> It's picked at random using the shares you set, and they keep seeing the same one on every visit.</p></li>
-        <li><p><strong>Every view, close and sign-up is counted.</strong> These go to your Google Analytics as <code>popup_view</code>, <code>popup_close</code> and <code>popup_signup</code>, labelled A, B or C.</p></li>
-        <li><p><strong>Every subscriber is tagged in Shopify.</strong> Look under Customers for <code>popup-A</code>, <code>popup-B</code> or <code>popup-C</code>. They also keep your <code>customer-code</code> tag.</p></li>
+        <li><p><strong>Every view, close and sign-up is counted.</strong> They go to your Google Analytics with the design letter in the name, like <code>popup_view_b</code> and <code>popup_signup_b</code>. Nothing to set up.</p></li>
+        <li><p><strong>Every subscriber is tagged in Shopify.</strong> Look under Customers for <code>popup-A</code> to <code>popup-E</code>. They also keep your <code>customer-code</code> tag.</p></li>
         <li><p><strong>Pick the winner.</strong> After a few weeks, set the losing designs to 0% in the theme editor. No code changes needed.</p></li>
       </ol>
     </section>
     <section class="panel sim">
       <h2>Try the split</h2>
-      <div class="sim-row"><label for="wA">A</label><input type="range" id="wA" min="0" max="100" value="34"><output id="oA" for="wA">34%</output></div>
-      <div class="sim-row"><label for="wB">B</label><input type="range" id="wB" min="0" max="100" value="33"><output id="oB" for="wB">33%</output></div>
-      <div class="sim-row"><label for="wC">C</label><input type="range" id="wC" min="0" max="100" value="33"><output id="oC" for="wC">33%</output></div>
+      <div class="sim-row"><label for="wA">A</label><input type="range" id="wA" min="0" max="100" value="20"><output id="oA" for="wA">20%</output></div>
+      <div class="sim-row"><label for="wB">B</label><input type="range" id="wB" min="0" max="100" value="20"><output id="oB" for="wB">20%</output></div>
+      <div class="sim-row"><label for="wC">C</label><input type="range" id="wC" min="0" max="100" value="20"><output id="oC" for="wC">20%</output></div>
+      <div class="sim-row"><label for="wD">D</label><input type="range" id="wD" min="0" max="100" value="20"><output id="oD" for="wD">20%</output></div>
+      <div class="sim-row"><label for="wE">E</label><input type="range" id="wE" min="0" max="100" value="20"><output id="oE" for="wE">20%</output></div>
       <button class="act" id="simulate" type="button">Send 1,000 pretend visitors</button>
       <div class="bars" id="bars">
         <div><b>A</b><span class="track"><span class="fill"></span></span><em>–</em></div>
         <div><b>B</b><span class="track"><span class="fill"></span></span><em>–</em></div>
         <div><b>C</b><span class="track"><span class="fill"></span></span><em>–</em></div>
+        <div><b>D</b><span class="track"><span class="fill"></span></span><em>–</em></div>
+        <div><b>E</b><span class="track"><span class="fill"></span></span><em>–</em></div>
       </div>
       <p class="note">Uses the exact same picker that runs on your store.</p>
     </section>
@@ -782,13 +935,25 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   "preview": true,
   "mount": "#vp",
   "experiment": "popup-test-1",
-  "weights": { "A": 34, "B": 33, "C": 33 },
+  "weights": { "A": 20, "B": 20, "C": 20, "D": 20, "E": 20 },
   "eyebrow": "✹ the pocket list",
   "marquee": "new designs ✹ fresh colours ✹ early-bird specials ✹ made in melbourne ✹",
   "headlineA": "Get first dibs on new lamps.",
   "headlineB": "Be first to the glow.",
   "headlineC": "What's your colour?",
   "headlineC2": "Good pick. [colour] it is.",
+  "headlineD": "Where's your next lamp going?",
+  "headlineD2": "[room] it is.",
+  "bodyD": "Tell us the room and we'll send lamp ideas that suit it, plus first dibs on new designs.",
+  "rooms": [
+    { "id": "living-room", "name": "Living room", "mood": "cosy & warm", "product": "Mocha Lamp", "price": "$165.00", "url": "#", "image": "https://cdn.shopify.com/s/files/1/0848/5647/1856/files/product-studio-41j4mc.png?width=400" },
+    { "id": "bedroom", "name": "Bedroom", "mood": "calm & soft", "product": "Bubble Lamp", "price": "$155.00", "url": "#", "image": "https://cdn.shopify.com/s/files/1/0848/5647/1856/files/IMG-1511.jpg?width=400" },
+    { "id": "desk", "name": "Desk", "mood": "bright & focused", "product": "Limoncello Lamp", "price": "$155.00", "url": "#", "image": "https://cdn.shopify.com/s/files/1/0848/5647/1856/files/4A37B146-F98C-47A2-ABA5-2567BC11B8EA.jpg?width=400" },
+    { "id": "dining", "name": "Dining", "mood": "moody glow", "product": "Astro Pendant Lamp", "price": "$195.00", "url": "#", "image": "https://cdn.shopify.com/s/files/1/0848/5647/1856/files/493A2CEF-9A7B-4E90-844C-D1F28908C7AE.jpg?width=400" }
+  ],
+  "headlineE": "Print yourself $10 off.",
+  "buttonE": "Start print",
+  "receipt": "Item | $10 off\nMin. spend | $100\nMade in | Melbourne\nStatus | waiting on you",
   "body": "Our monthly newsletter: new designs, fresh colours and early-bird specials, straight from the Melbourne studio.",
   "offer": "$10 off your first order over $100",
   "button": "Join the list",
@@ -810,6 +975,8 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
  *   A  Pocket Pop   centred card with the cream marquee band and logo dots
  *   B  Lights On    split card, lamp photo flickers on as it opens
  *   C  Colour Pick  corner card that asks for a favourite colour first
+ *   D  Room Match   pick the room it's for, get a matching lamp, then sign up
+ *   E  Print Job    a receipt that prints down from the top of the screen
  *
  * Each visitor is given one design (weighted random), keeps it on every visit,
  * and every view / close / sign-up is reported with that design's letter.
@@ -825,8 +992,8 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   // The theme editor re-runs this script whenever a setting changes.
   if (window.PocketPopup && window.PocketPopup.destroy) window.PocketPopup.destroy();
 
-  const VARIANTS = ['A', 'B', 'C'];
-  const MODAL = { A: true, B: true, C: false };
+  const VARIANTS = ['A', 'B', 'C', 'D', 'E'];
+  const MODAL = { A: true, B: true, C: false, D: true, E: true };
   const COLOURS = C.colours || [
     { id: 'lemon', name: 'Lemon', hex: '#F5D04C' },
     { id: 'candy', name: 'Candy', hex: '#F2A6B8' },
@@ -836,6 +1003,19 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     { id: 'spearmint', name: 'Spearmint', hex: '#9ED3B8' },
     { id: 'maple', name: 'Maple', hex: '#B9773F' },
   ];
+
+  const ROOMS = (C.rooms || []).filter((r) => r && r.name);
+
+  function jobNumber() {
+    const digits = String(C.code || '').replace(/\D/g, '');
+    return digits.slice(-4) || '0001';
+  }
+
+  function receiptRows() {
+    return String(C.receipt || '').split('\n').map((line) => line.split('|'))
+      .filter((p) => p.length === 2 && p[0].trim())
+      .map((p) => `<div><dt>${esc(p[0].trim())}</dt><dd>${esc(p[1].trim())}</dd></div>`).join('');
+  }
 
   const experiment = String(C.experiment || 'popup-test-1');
   const K = {
@@ -857,7 +1037,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   let root = null;
   let tab = null;
   let variant = null;
-  let colour = null;
+  let choice = null; // { kind: 'colour' | 'room', id }
   let lastFocus = null;
   const cleanups = [];
 
@@ -873,7 +1053,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   }
 
   function forcedVariant() {
-    const m = location.search.match(/[?&]pp_popup=([abc])\b/i);
+    const m = location.search.match(/[?&]pp_popup=([a-e])\b/i);
     return m ? m[1].toUpperCase() : null;
   }
 
@@ -904,7 +1084,14 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       return;
     }
     if (C.designMode) return;
-    try { if (typeof window.gtag === 'function') window.gtag('event', name, params); } catch (e) { /* ignore */ }
+    // The design letter goes in the event name (popup_signup_b) so reports can
+    // split by design without any Google Analytics setup.
+    try {
+      if (typeof window.gtag === 'function') {
+        const gaParams = C.gaId ? Object.assign({ send_to: C.gaId }, params) : params;
+        window.gtag('event', name + '_' + String(variant).toLowerCase(), gaParams);
+      }
+    } catch (e) { /* ignore */ }
     try {
       const a = window.Shopify && window.Shopify.analytics;
       if (a && typeof a.publish === 'function') a.publish(name, params);
@@ -919,12 +1106,12 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   const eyebrow = () => (C.eyebrow ? `<p class="ppp__eyebrow">${esc(C.eyebrow)}</p>` : '');
   const offer = () => (C.offer ? `<p class="ppp__offer"><span aria-hidden="true">✹</span>${esc(C.offer)}</p>` : '');
 
-  function formHTML() {
+  function formHTML(label) {
     return `<form class="ppp__form" novalidate>
         <label class="ppp__sr" for="ppp-email">Email address</label>
         <input id="ppp-email" class="ppp__input" type="email" name="email" autocomplete="email"
           inputmode="email" placeholder="${esc(C.placeholder || 'your@email.com')}" required>
-        <button class="ppp__btn" type="submit">${esc(C.button || 'Join the list')}</button>
+        <button class="ppp__btn" type="submit">${esc(label || C.button || 'Join the list')}</button>
         <p class="ppp__err" role="alert" hidden></p>
         ${C.fine ? `<p class="ppp__fine">${esc(C.fine)}</p>` : ''}
       </form>`;
@@ -1019,6 +1206,58 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
         </div>
         ${doneHTML()}
       </div>`,
+
+    D: () => `
+      <div class="ppp__scrim" data-close="scrim"></div>
+      <div class="ppp__card ppp-d" role="dialog" aria-modal="true" aria-labelledby="ppp-title" tabindex="-1">
+        ${closeBtn}
+        <div class="ppp__main">
+          <div class="ppp-d__step" data-step="pick">
+            ${eyebrow()}
+            <h2 class="ppp__title" id="ppp-title">${esc(C.headlineD)}</h2>
+            <div class="ppp-d__rooms" role="group" aria-label="Rooms">
+              ${ROOMS.map((r, i) => `<button type="button" class="ppp-d__room" data-room="${i}">
+                  ${r.image ? `<img src="${esc(r.image)}" alt="" loading="lazy" decoding="async">` : ''}
+                  <span class="ppp-d__label"><b>${esc(r.name)}</b><small>${esc(r.mood)}</small></span>
+                </button>`).join('')}
+            </div>
+          </div>
+          <div class="ppp-d__step ppp-d__match" data-step="form" hidden>
+            <figure class="ppp-d__pick">
+              <img alt="" decoding="async">
+              <figcaption><small>Our pick</small><b></b><span></span></figcaption>
+            </figure>
+            <div class="ppp-d__form">
+              <button type="button" class="ppp-c__chosen" data-back><i></i><span></span><small>change</small></button>
+              <h2 class="ppp__title ppp-d__title2" tabindex="-1"></h2>
+              <p class="ppp__body">${esc(C.bodyD || C.body)}</p>
+              ${offer()}
+              ${formHTML()}
+            </div>
+          </div>
+        </div>
+        ${doneHTML()}
+      </div>`,
+
+    E: () => `
+      <div class="ppp__scrim ppp__scrim--light" data-close="scrim"></div>
+      <div class="ppp-e__wrap">
+        <div class="ppp-e__head" aria-hidden="true"><i></i><span>${esc(C.printerName || 'pocket-01 · melbourne')}</span></div>
+        <div class="ppp__card ppp-e" role="dialog" aria-modal="true" aria-labelledby="ppp-title" tabindex="-1">
+          ${closeBtn}
+          <div class="ppp__main">
+            <p class="ppp-e__job">Print job #${esc(jobNumber())}</p>
+            <h2 class="ppp__title" id="ppp-title">${esc(C.headlineE)}</h2>
+            <dl class="ppp-e__rows">${receiptRows()}</dl>
+            ${formHTML(C.buttonE)}
+            <div class="ppp-e__progress" hidden aria-hidden="true">
+              <span class="ppp-e__bar"><i></i></span><span class="ppp-e__pct">printing 0%</span>
+            </div>
+          </div>
+          ${doneHTML()}
+          <div class="ppp-e__tear" aria-hidden="true"></div>
+        </div>
+      </div>`,
   };
 
   /* ---------- open / close ---------- */
@@ -1036,7 +1275,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     if (root) close(null);
     hideTab();
     variant = v;
-    colour = null;
+    choice = null;
     lastFocus = document.activeElement;
 
     root = document.createElement('div');
@@ -1133,9 +1372,10 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 
   function wire(el) {
     el.addEventListener('click', (e) => {
-      const t = e.target.closest('[data-close],[data-colour],[data-back],[data-copy]');
+      const t = e.target.closest('[data-close],[data-colour],[data-room],[data-back],[data-copy]');
       if (!t) return;
       if (t.dataset.close) close(t.dataset.close);
+      else if (t.dataset.room) pickRoom(Number(t.dataset.room));
       else if (t.dataset.colour) pickColour(t.dataset.colour, t.dataset.name, t.style.getPropertyValue('--sw'));
       else if (t.hasAttribute('data-back')) stepTo('pick');
       else if (t.dataset.copy) copyCode(t);
@@ -1145,13 +1385,15 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   }
 
   function stepTo(step) {
-    root.querySelectorAll('.ppp-c__step').forEach((s) => { s.hidden = s.dataset.step !== step; });
-    const focusEl = step === 'form' ? root.querySelector('.ppp-c__title2') : root.querySelector('.ppp-c__sw');
+    root.querySelectorAll('[data-step]').forEach((s) => { s.hidden = s.dataset.step !== step; });
+    const focusEl = step === 'form'
+      ? root.querySelector('.ppp-c__title2, .ppp-d__title2')
+      : root.querySelector('.ppp-c__sw, .ppp-d__room');
     if (focusEl) focusEl.focus({ preventScroll: true });
   }
 
   function pickColour(id, name, hex) {
-    colour = id;
+    choice = { kind: 'colour', id };
     const card = root.querySelector('.ppp-c');
     const chip = root.querySelector('.ppp-c__chosen');
     card.style.setProperty('--pick', hex || 'transparent');
@@ -1161,7 +1403,31 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       ? (C.headlineCAll || 'Can’t pick just one? Fair.')
       : String(C.headlineC2 || 'Good pick. [colour] it is.').replace(/\[colou?r\]/gi, name);
     root.querySelector('.ppp-c__title2').textContent = headline;
-    track('popup_colour', { popup_colour: id });
+    track('popup_choice', { popup_choice: id });
+    stepTo('form');
+  }
+
+  function pickRoom(i) {
+    const r = ROOMS[i];
+    if (!r) return;
+    choice = { kind: 'room', id: r.id };
+    const pick = root.querySelector('.ppp-d__pick');
+    const img = pick.querySelector('img');
+    if (r.image) { img.src = r.image; img.hidden = false; } else { img.hidden = true; }
+    pick.querySelector('b').textContent = r.product || '';
+    pick.querySelector('span').textContent = r.price || '';
+    const chip = root.querySelector('.ppp-d__form .ppp-c__chosen');
+    chip.querySelector('span').textContent = r.name;
+    chip.querySelector('i').style.backgroundImage = r.image ? `url("${r.image.replace(/"/g, '%22')}")` : '';
+    root.querySelector('.ppp-d__title2').textContent =
+      String(C.headlineD2 || '[room] it is.').replace(/\[room\]/gi, r.name);
+    // Point the thank-you button at the matching lamp.
+    const shop = root.querySelector('.ppp__btn--link');
+    if (shop && r.url) {
+      shop.href = r.url;
+      if (r.product) shop.textContent = 'Shop the ' + r.product;
+    }
+    track('popup_choice', { popup_choice: r.id });
     stepTo('form');
   }
 
@@ -1182,7 +1448,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 
   function tagsFor() {
     const tags = ['newsletter', 'popup', 'popup-' + variant, experiment];
-    if (colour) tags.push('colour-' + colour);
+    if (choice) tags.push(choice.kind + '-' + choice.id);
     String(C.extraTags || '').split(',').map((t) => t.trim()).filter(Boolean).forEach((t) => tags.push(t));
     return tags.join(',');
   }
@@ -1216,7 +1482,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     if (!f) return false;
     f.querySelector('[name="contact[email]"]').value = email;
     f.querySelector('[name="contact[tags]"]').value = tags;
-    store.set(K.pending, JSON.stringify({ v: variant, c: colour || 'none' }));
+    store.set(K.pending, JSON.stringify({ v: variant, c: choice ? choice.id : 'none' }));
     f.submit();
     return true;
   }
@@ -1246,8 +1512,9 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     const result = await send(email, tags);
 
     if (result === 'ok') {
+      if (variant === 'E') await printOut(form);
       if (persist) store.set(K.joined, '1');
-      track('popup_signup', { popup_colour: colour || 'none' });
+      track('popup_signup', { popup_choice: choice ? choice.id : 'none' });
       showDone();
     } else if (result === 'native' && nativeSubmit(email, tags)) {
       // page is navigating away
@@ -1257,6 +1524,29 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       err.textContent = C.errNetwork || 'Couldn’t sign you up just now. Try again in a moment.';
       err.hidden = false;
     }
+  }
+
+  // Design E: a short "printing" progress bar before the code appears.
+  function printOut(form) {
+    const box = root && root.querySelector('.ppp-e__progress');
+    if (!box) return Promise.resolve();
+    form.hidden = true;
+    box.hidden = false;
+    const bar = box.querySelector('i');
+    const pct = box.querySelector('.ppp-e__pct');
+    const total = reduceMotion ? 1 : 1400;
+    const start = performance.now();
+    return new Promise((resolve) => {
+      const step = (t) => {
+        const k = Math.min(1, (t - start) / total);
+        const n = Math.round(k * 100);
+        bar.style.width = n + '%';
+        pct.textContent = k < 1 ? 'printing ' + n + '%' : 'done';
+        if (k < 1) requestAnimationFrame(step);
+        else setTimeout(resolve, reduceMotion ? 0 : 250);
+      };
+      requestAnimationFrame(step);
+    });
   }
 
   function onKey(e) {
@@ -1351,7 +1641,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       try { p = JSON.parse(pending); } catch (e) { /* ignore */ }
       if (TEMPLATES[p.v]) {
         open(p.v, { silent: true, success: true });
-        track('popup_signup', { popup_colour: p.c || 'none' });
+        track('popup_signup', { popup_choice: p.c || 'none' });
       }
       return;
     }
@@ -1392,6 +1682,14 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       best: 'The gentlest ask. You also learn each subscriber’s favourite colour, so you can email lemon fans about new lemon lamps.',
       watch: 'No dark overlay, so it is easier to ignore.',
       tags: '<code>popup-C</code> <code>colour-lemon</code> (etc.) <code>customer-code</code>' },
+    D: { name: 'D · Room Match',
+      best: 'Selling, not just signing up. Each visitor sees a lamp picked for their room, and the thank-you button links straight to it. You also learn which rooms people are shopping for.',
+      watch: 'Two steps before the email, so some people may drop off. The room lamps are set in the theme editor.',
+      tags: '<code>popup-D</code> <code>room-bedroom</code> (etc.) <code>customer-code</code>' },
+    E: { name: 'E · Print Job',
+      best: 'Standing out. Nothing else looks like it, and it tells your made-by-machines story in a few seconds.',
+      watch: 'The most playful of the five, so it is the riskiest. The receipt text is set in the theme editor.',
+      tags: '<code>popup-E</code> <code>customer-code</code>' },
   };
 
   const wrap = document.getElementById('stageWrap');
@@ -1455,19 +1753,19 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     const { name, params } = e.detail;
     const empty = log.querySelector('.empty');
     if (empty) empty.remove();
-    const extra = params.popup_trigger || params.close_method || (params.popup_colour && params.popup_colour !== 'none' ? params.popup_colour : '') || '';
+    const extra = params.popup_trigger || params.close_method || (params.popup_choice && params.popup_choice !== 'none' ? params.popup_choice : '') || '';
     const secs = Math.round((Date.now() - t0) / 1000);
     const li = document.createElement('li');
     li.innerHTML = '<time>' + Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0') + '</time>' +
       '<span class="v">' + params.popup_variant + '</span><span class="e"><b></b> <span></span></span>';
-    li.querySelector('b').textContent = name;
+    li.querySelector('b').textContent = name + '_' + String(params.popup_variant).toLowerCase();
     li.querySelector('.e span').textContent = extra;
     log.prepend(li);
     while (log.children.length > 7) log.lastElementChild.remove();
   });
 
   // split simulator, using the real picker
-  ['A', 'B', 'C'].forEach((id) => {
+  ['A', 'B', 'C', 'D', 'E'].forEach((id) => {
     const input = document.getElementById('w' + id);
     input.addEventListener('input', () => {
       document.getElementById('o' + id).textContent = input.value + '%';
@@ -1475,13 +1773,14 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   });
   document.getElementById('simulate').addEventListener('click', () => {
     const saved = C.weights;
-    C.weights = { A: +document.getElementById('wA').value, B: +document.getElementById('wB').value, C: +document.getElementById('wC').value };
-    const n = { A: 0, B: 0, C: 0 };
+    C.weights = {};
+    const n = {};
+    'ABCDE'.split('').forEach((id) => { C.weights[id] = +document.getElementById('w' + id).value; n[id] = 0; });
     for (let i = 0; i < 1000; i++) { const v = P.assign(); if (v) n[v]++; }
     C.weights = saved;
-    const max = Math.max(1, n.A, n.B, n.C);
+    const max = Math.max(1, ...Object.values(n));
     document.querySelectorAll('#bars > div').forEach((row, i) => {
-      const id = 'ABC'[i];
+      const id = 'ABCDE'[i];
       row.querySelector('.fill').style.width = (n[id] / max * 100) + '%';
       row.querySelector('em').textContent = n[id].toLocaleString();
     });
