@@ -1434,6 +1434,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     const form = el.querySelector('.ppp__form');
     if (form) form.addEventListener('submit', onSubmit);
     el.addEventListener('focusin', (e) => {
+      if (e.target.matches('.ppp__input')) prepareCaptcha();
       if (!e.target.matches('.ppp__input') || !el.classList.contains('ppp--compact')) return;
       setTimeout(() => { onKeyboard(); e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 300);
     });
@@ -1525,17 +1526,50 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     return 'native';
   }
 
-  // Post the hidden Shopify form. The page reloads on the same page and
-  // boot() shows the thank-you (or Shopify's error) in the same design.
-  function nativeSubmit(email, tags) {
-    const f = document.getElementById('pp-popup-native');
+  /* ---------- Shopify captcha ---------- */
+
+  // Shopify protects customer forms with an invisible hCaptcha that normally
+  // loads when someone clicks into the form. Ours is hidden (people type in
+  // the popup), so switch it on ourselves through Shopify's own
+  // Shopify.captcha.protect() as soon as the popup's email box gets focus.
+  const nativeForm = () => document.getElementById('pp-popup-native');
+  const captchaReady = (f) => !!(f && (f.hasAttribute('data-hcaptcha-bound') || f.dataset.recaptchaBound));
+  let captchaAsked = false;
+
+  function prepareCaptcha() {
+    const f = nativeForm();
+    const cap = window.Shopify && window.Shopify.captcha;
+    if (captchaAsked || !f || captchaReady(f) || !cap || typeof cap.protect !== 'function') return;
+    captchaAsked = true;
+    try { cap.protect(f, () => {}); } catch (e) { /* store has no captcha */ }
+  }
+
+  function waitForCaptcha(f, ms) {
+    const cap = window.Shopify && window.Shopify.captcha;
+    if (!cap || typeof cap.protect !== 'function' || captchaReady(f)) return Promise.resolve(true);
+    prepareCaptcha();
+    return new Promise((resolve) => {
+      const t0 = Date.now();
+      const tick = () => {
+        if (captchaReady(f)) resolve(true);
+        else if (Date.now() - t0 > ms) resolve(false);
+        else setTimeout(tick, 100);
+      };
+      tick();
+    });
+  }
+
+  // Post the hidden Shopify form. Once the captcha is attached, Shopify's
+  // script takes over the submit, adds its token and sends the form. The page
+  // reloads and boot() shows the thank-you (or Shopify's error).
+  async function nativeSubmit(email, tags) {
+    const f = nativeForm();
     if (!f) return false;
     f.querySelector('[name="contact[email]"]').value = email;
     f.querySelector('[name="contact[tags]"]').value = tags;
+    const ready = await waitForCaptcha(f, 10000);
+    if (!ready) return false;
     store.set(K.pending, JSON.stringify({ v: variant, c: choice ? choice.id : 'none' }));
-    // Submit like a button press so Shopify's captcha script sees the submit
-    // event and adds its token first. A plain f.submit() skips it and Shopify
-    // answers "Missing CAPTCHA token".
     const btn = f.querySelector('[type="submit"]');
     if (typeof f.requestSubmit === 'function') f.requestSubmit(btn || undefined);
     else if (btn) btn.click();
@@ -1572,7 +1606,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       if (persist) store.set(K.joined, '1');
       track('popup_signup', { popup_choice: choice ? choice.id : 'none' });
       showDone();
-    } else if (result === 'native' && nativeSubmit(email, tags)) {
+    } else if (result === 'native' && await nativeSubmit(email, tags)) {
       // page is navigating away
     } else {
       btn.disabled = false;
