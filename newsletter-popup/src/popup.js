@@ -336,7 +336,7 @@
   }
 
   function tagsFor() {
-    const tags = ['newsletter', 'popup', 'popup-' + variant, 'popup-test-' + experiment];
+    const tags = ['newsletter', 'popup', 'popup-' + variant, experiment];
     if (colour) tags.push('colour-' + colour);
     String(C.extraTags || '').split(',').map((t) => t.trim()).filter(Boolean).forEach((t) => tags.push(t));
     return tags.join(',');
