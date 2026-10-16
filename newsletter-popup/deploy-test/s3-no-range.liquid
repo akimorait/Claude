@@ -1,0 +1,224 @@
+<div></div>
+{% schema %}
+{
+  "name": "Newsletter popup",
+  "class": "pp-popup-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Turn on and A/B test"
+    },
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Show the popup",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "experiment",
+      "label": "Test name",
+      "default": "popup-test-1",
+      "info": "Change this name to start a brand-new test. Every visitor is shuffled into a design again."
+    },
+    {
+      "type": "paragraph",
+      "content": "Set a design to 0 to switch it off. When you have a winner, set the others to 0. While editing here, the design with the biggest share is shown."
+    },
+    {
+      "type": "header",
+      "content": "When it appears"
+    },
+    {
+      "type": "checkbox",
+      "id": "exit_intent",
+      "label": "Or when the mouse heads for the browser tabs (computers only)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_exit",
+      "label": "On phones, when someone flicks quickly back up the page (like they're about to leave)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "tab",
+      "label": "After closing, keep a small tab in the corner to reopen it",
+      "default": true,
+      "info": "Visitors can hide the tab with its own x."
+    },
+    {
+      "type": "header",
+      "content": "Words"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label above the headline",
+      "default": "✹ the pocket list"
+    },
+    {
+      "type": "text",
+      "id": "headline_a",
+      "label": "Headline for A",
+      "default": "Get first dibs on new lamps."
+    },
+    {
+      "type": "text",
+      "id": "headline_b",
+      "label": "Headline for B",
+      "default": "Be first to the glow."
+    },
+    {
+      "type": "text",
+      "id": "headline_c",
+      "label": "Colour question for C",
+      "default": "What's your colour?"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Description",
+      "default": "Our monthly newsletter: new designs, fresh colours and early-bird specials, straight from the Melbourne studio."
+    },
+    {
+      "type": "text",
+      "id": "offer",
+      "label": "Offer line (leave empty for none)",
+      "default": "$10 off your first order over $100"
+    },
+    {
+      "type": "text",
+      "id": "button",
+      "label": "Button",
+      "default": "Join the list"
+    },
+    {
+      "type": "text",
+      "id": "fine",
+      "label": "Small print",
+      "default": "No spam. Unsubscribe anytime."
+    },
+    {
+      "type": "header",
+      "content": "Design D · Room Match"
+    },
+    {
+      "type": "text",
+      "id": "headline_d",
+      "label": "Room question",
+      "default": "Where's your next lamp going?"
+    },
+    {
+      "type": "text",
+      "id": "room_1",
+      "label": "Room 1 (name | mood)",
+      "default": "Living room | cosy & warm"
+    },
+    {
+      "type": "product",
+      "id": "room_1_product",
+      "label": "Room 1 lamp",
+      "info": "Defaults to the Mocha Lamp."
+    },
+    {
+      "type": "text",
+      "id": "room_2",
+      "label": "Room 2 (name | mood)",
+      "default": "Bedroom | calm & soft"
+    },
+    {
+      "type": "product",
+      "id": "room_2_product",
+      "label": "Room 2 lamp",
+      "info": "Defaults to the Bubble Lamp."
+    },
+    {
+      "type": "text",
+      "id": "room_3",
+      "label": "Room 3 (name | mood)",
+      "default": "Desk | bright & focused"
+    },
+    {
+      "type": "product",
+      "id": "room_3_product",
+      "label": "Room 3 lamp",
+      "info": "Defaults to the Limoncello Lamp."
+    },
+    {
+      "type": "text",
+      "id": "room_4",
+      "label": "Room 4 (name | mood)",
+      "default": "Dining | moody glow"
+    },
+    {
+      "type": "product",
+      "id": "room_4_product",
+      "label": "Room 4 lamp",
+      "info": "Defaults to the Astro Pendant Lamp."
+    },
+    {
+      "type": "header",
+      "content": "Design E · Print Job"
+    },
+    {
+      "type": "text",
+      "id": "headline_e",
+      "label": "Headline",
+      "default": "Print yourself $10 off."
+    },
+    {
+      "type": "textarea",
+      "id": "receipt",
+      "label": "Receipt lines",
+      "default": "Item | $10 off\nMin. spend | $100\nMade in | Melbourne\nStatus | waiting on you",
+      "info": "One line each, written as: label | value"
+    },
+    {
+      "type": "header",
+      "content": "After sign-up"
+    },
+    {
+      "type": "text",
+      "id": "success_title",
+      "label": "Thank-you headline",
+      "default": "You're on the list ✹"
+    },
+    {
+      "type": "textarea",
+      "id": "success_body",
+      "label": "Thank-you message",
+      "default": "Welcome in. Here is your $10 off, and new lamps will land in your inbox first."
+    },
+    {
+      "type": "text",
+      "id": "discount_code",
+      "label": "Discount code to show (optional)",
+      "default": "POCKET3141",
+      "info": "Must match a code under Discounts. Leave empty to show no code."
+    },
+    {
+      "type": "text",
+      "id": "shop_label",
+      "label": "Shop button",
+      "default": "Shop lamps"
+    },
+    {
+      "type": "header",
+      "content": "Design B photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_b",
+      "label": "Lamp photo",
+      "info": "A lit lamp works best: it starts dark and flickers on. Defaults to the Limoncello Lamp."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter popup"
+    }
+  ]
+}
+{% endschema %}
