@@ -39,6 +39,7 @@
     closedUntil: 'pp_popup:closed_until',
     joined: 'pp_popup:joined',
     pending: 'pp_popup:pending',
+    tabOff: 'pp_popup:tab_off',
   };
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -50,6 +51,7 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let root = null;
+  let tab = null;
   let variant = null;
   let colour = null;
   let lastFocus = null;
@@ -228,6 +230,7 @@
     opts = opts || {};
     if (!TEMPLATES[v]) return;
     if (root) close(null);
+    hideTab();
     variant = v;
     colour = null;
     lastFocus = document.activeElement;
@@ -270,8 +273,46 @@
     if (el.dataset.state !== 'done') {
       if (persist) store.set(K.closedUntil, String(Date.now() + (Number(C.hideDays) || 14) * 864e5));
       track('popup_close', { close_method: method });
+      showTab(el.dataset.variant);
     }
     document.dispatchEvent(new CustomEvent('pp-popup-closed'));
+  }
+
+  /* ---------- minimised tab ---------- */
+
+  // After a close, a small pill stays in the corner so visitors can reopen
+  // the same design whenever they like, until they hide it or sign up.
+  function showTab(v) {
+    if (C.tab === false || !TEMPLATES[v]) return;
+    hideTab();
+    const label = C.tabLabel || (C.offer ? 'Get $10 off' : 'Join the list');
+    tab = document.createElement('div');
+    tab.className = 'ppp ppp--tab' + (mount === document.body ? '' : ' ppp--contained');
+    tab.innerHTML = `<div class="ppp-tab">
+        <button type="button" class="ppp-tab__open" data-tab="open">
+          ${dots('ppp-tab__dots')}<span>${esc(label)}</span></button>
+        <button type="button" class="ppp-tab__x" data-tab="hide" aria-label="Hide this">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>`;
+    tab.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-tab]');
+      if (!t) return;
+      if (t.dataset.tab === 'open') {
+        open(v, { trigger: 'tab' });
+      } else {
+        hideTab();
+        if (persist) store.set(K.tabOff, store.get(K.closedUntil) || String(Date.now() + 864e5));
+        variant = v;
+        track('popup_tab_hide');
+        document.dispatchEvent(new CustomEvent('pp-popup-closed'));
+      }
+    });
+    mount.appendChild(tab);
+    requestAnimationFrame(() => requestAnimationFrame(() => tab && tab.classList.add('is-open')));
+  }
+
+  function hideTab() {
+    if (tab) { tab.remove(); tab = null; }
   }
 
   function showDone() {
@@ -433,13 +474,6 @@
 
   /* ---------- when to show ---------- */
 
-  function blocked() {
-    if (C.suppress) return true;
-    if (store.get(K.joined)) return true;
-    const until = Number(store.get(K.closedUntil) || 0);
-    return until > Date.now();
-  }
-
   function arm(v) {
     let fired = false;
     const timers = [];
@@ -483,6 +517,7 @@
 
     window.PocketPopup = {
       open: (v, opts) => open(String(v).toUpperCase(), opts || { trigger: 'manual' }),
+      hideTab,
       close: () => close('api'),
       variant: () => variant,
       assign,
@@ -491,6 +526,7 @@
       destroy() {
         cleanups.splice(0).forEach((fn) => fn());
         if (root) { root.remove(); root = null; }
+        hideTab();
         document.documentElement.classList.remove('ppp-lock');
       },
     };
@@ -518,9 +554,16 @@
 
     const forced = forcedVariant();
     if (forced) { open(forced, { trigger: 'url' }); return; }
-    if (blocked()) return;
+    if (C.suppress || store.get(K.joined)) return;
     const v = assign();
-    if (v) arm(v);
+    if (!v) return;
+    const now = Date.now();
+    if (Number(store.get(K.closedUntil) || 0) > now) {
+      // Closed recently: no popup, just the tab (unless they hid that too).
+      if (Number(store.get(K.tabOff) || 0) <= now) showTab(v);
+      return;
+    }
+    arm(v);
   }
 
   boot();

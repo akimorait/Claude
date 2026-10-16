@@ -387,6 +387,55 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 .ppp-c .ppp__body { font-size: 13px; }
 .ppp-c .ppp__done .ppp__title { font-size: 26px; }
 
+/* ---------- minimised tab ---------- */
+.ppp-tab {
+  position: absolute;
+  left: max(20px, env(safe-area-inset-left, 0px));
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  background: var(--pp-paper);
+  border-radius: 999px;
+  box-shadow: 0 12px 30px -12px rgba(29, 28, 28, 0.45), 0 0 0 1.5px var(--pp-ink);
+  opacity: 0;
+  transform: translateX(-24px);
+  transition: opacity 0.25s ease, transform 0.45s var(--pp-ease);
+}
+.ppp--tab.is-open .ppp-tab { opacity: 1; transform: none; }
+.ppp-tab__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px 10px 12px;
+  border: 0;
+  background: none;
+  color: var(--pp-ink);
+  cursor: pointer;
+  font: 700 13px var(--pp-mono);
+}
+.ppp-tab__dots { display: grid; grid-template-columns: repeat(2, 8px); gap: 3px; }
+.ppp-tab__dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+.ppp-tab__dots i:nth-child(1) { background: var(--pp-dot1); }
+.ppp-tab__dots i:nth-child(2) { background: var(--pp-dot2); }
+.ppp-tab__dots i:nth-child(3) { background: var(--pp-dot3); }
+.ppp-tab__dots i:nth-child(4) { background: var(--pp-dot4); }
+.ppp-tab__open:hover span { text-decoration: underline; }
+.ppp-tab__x {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-right: 6px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(29, 28, 28, 0.07);
+  color: var(--pp-ink);
+  cursor: pointer;
+}
+.ppp-tab__x svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.ppp-tab button:focus-visible { outline: 2px solid var(--pp-ink); outline-offset: 2px; border-radius: 999px; }
+
 /* ---------- small screens (class set by script from the real width) ---------- */
 .ppp--compact.ppp--a, .ppp--compact.ppp--b { padding: 16px; }
 .ppp--compact .ppp__title { font-size: 28px; }
@@ -419,7 +468,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ppp__card, .ppp__scrim { transition: opacity 0.15s linear; transform: none !important; }
+  .ppp__card, .ppp__scrim, .ppp-tab { transition: opacity 0.15s linear; transform: none !important; }
   .ppp-a__track { animation: none; }
   .ppp *, .ppp *::before { animation-duration: 0.001s !important; animation-delay: 0s !important; }
 }

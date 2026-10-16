@@ -36,6 +36,8 @@
       "scroll": {{ s.scroll | json }},
       "exitIntent": {{ s.exit_intent | json }},
       "hideDays": {{ s.hide_days | json }},
+      "tab": {{ s.tab | json }},
+      "tabLabel": {{ s.tab_label | json }},
       "eyebrow": {{ s.eyebrow | json }},
       "marquee": {{ s.marquee | json }},
       "headlineA": {{ s.headline_a | json }},
@@ -101,6 +103,11 @@
     { "type": "range", "id": "scroll", "label": "Or after scrolling this far (0 = off)", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40 },
     { "type": "checkbox", "id": "exit_intent", "label": "Or when the mouse heads for the browser tabs (computers only)", "default": true },
     { "type": "range", "id": "hide_days", "label": "After someone closes it, hide it for", "min": 1, "max": 60, "step": 1, "unit": "d", "default": 14 },
+    {
+      "type": "checkbox", "id": "tab", "label": "After closing, keep a small tab in the corner to reopen it", "default": true,
+      "info": "Visitors can hide the tab with its own x."
+    },
+    { "type": "text", "id": "tab_label", "label": "Tab text", "default": "Get $10 off" },
 
     { "type": "header", "content": "Words" },
     { "type": "text", "id": "eyebrow", "label": "Small label above the headline", "default": "✹ the pocket list" },

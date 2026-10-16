@@ -36,6 +36,8 @@
       "scroll": {{ s.scroll | json }},
       "exitIntent": {{ s.exit_intent | json }},
       "hideDays": {{ s.hide_days | json }},
+      "tab": {{ s.tab | json }},
+      "tabLabel": {{ s.tab_label | json }},
       "eyebrow": {{ s.eyebrow | json }},
       "marquee": {{ s.marquee | json }},
       "headlineA": {{ s.headline_a | json }},
@@ -453,6 +455,55 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 .ppp-c .ppp__body { font-size: 13px; }
 .ppp-c .ppp__done .ppp__title { font-size: 26px; }
 
+/* ---------- minimised tab ---------- */
+.ppp-tab {
+  position: absolute;
+  left: max(20px, env(safe-area-inset-left, 0px));
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  background: var(--pp-paper);
+  border-radius: 999px;
+  box-shadow: 0 12px 30px -12px rgba(29, 28, 28, 0.45), 0 0 0 1.5px var(--pp-ink);
+  opacity: 0;
+  transform: translateX(-24px);
+  transition: opacity 0.25s ease, transform 0.45s var(--pp-ease);
+}
+.ppp--tab.is-open .ppp-tab { opacity: 1; transform: none; }
+.ppp-tab__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px 10px 12px;
+  border: 0;
+  background: none;
+  color: var(--pp-ink);
+  cursor: pointer;
+  font: 700 13px var(--pp-mono);
+}
+.ppp-tab__dots { display: grid; grid-template-columns: repeat(2, 8px); gap: 3px; }
+.ppp-tab__dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+.ppp-tab__dots i:nth-child(1) { background: var(--pp-dot1); }
+.ppp-tab__dots i:nth-child(2) { background: var(--pp-dot2); }
+.ppp-tab__dots i:nth-child(3) { background: var(--pp-dot3); }
+.ppp-tab__dots i:nth-child(4) { background: var(--pp-dot4); }
+.ppp-tab__open:hover span { text-decoration: underline; }
+.ppp-tab__x {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-right: 6px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(29, 28, 28, 0.07);
+  color: var(--pp-ink);
+  cursor: pointer;
+}
+.ppp-tab__x svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.ppp-tab button:focus-visible { outline: 2px solid var(--pp-ink); outline-offset: 2px; border-radius: 999px; }
+
 /* ---------- small screens (class set by script from the real width) ---------- */
 .ppp--compact.ppp--a, .ppp--compact.ppp--b { padding: 16px; }
 .ppp--compact .ppp__title { font-size: 28px; }
@@ -485,7 +536,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ppp__card, .ppp__scrim { transition: opacity 0.15s linear; transform: none !important; }
+  .ppp__card, .ppp__scrim, .ppp-tab { transition: opacity 0.15s linear; transform: none !important; }
   .ppp-a__track { animation: none; }
   .ppp *, .ppp *::before { animation-duration: 0.001s !important; animation-delay: 0s !important; }
 }
@@ -531,6 +582,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     closedUntil: 'pp_popup:closed_until',
     joined: 'pp_popup:joined',
     pending: 'pp_popup:pending',
+    tabOff: 'pp_popup:tab_off',
   };
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -542,6 +594,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let root = null;
+  let tab = null;
   let variant = null;
   let colour = null;
   let lastFocus = null;
@@ -720,6 +773,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     opts = opts || {};
     if (!TEMPLATES[v]) return;
     if (root) close(null);
+    hideTab();
     variant = v;
     colour = null;
     lastFocus = document.activeElement;
@@ -762,8 +816,46 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     if (el.dataset.state !== 'done') {
       if (persist) store.set(K.closedUntil, String(Date.now() + (Number(C.hideDays) || 14) * 864e5));
       track('popup_close', { close_method: method });
+      showTab(el.dataset.variant);
     }
     document.dispatchEvent(new CustomEvent('pp-popup-closed'));
+  }
+
+  /* ---------- minimised tab ---------- */
+
+  // After a close, a small pill stays in the corner so visitors can reopen
+  // the same design whenever they like, until they hide it or sign up.
+  function showTab(v) {
+    if (C.tab === false || !TEMPLATES[v]) return;
+    hideTab();
+    const label = C.tabLabel || (C.offer ? 'Get $10 off' : 'Join the list');
+    tab = document.createElement('div');
+    tab.className = 'ppp ppp--tab' + (mount === document.body ? '' : ' ppp--contained');
+    tab.innerHTML = `<div class="ppp-tab">
+        <button type="button" class="ppp-tab__open" data-tab="open">
+          ${dots('ppp-tab__dots')}<span>${esc(label)}</span></button>
+        <button type="button" class="ppp-tab__x" data-tab="hide" aria-label="Hide this">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>`;
+    tab.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-tab]');
+      if (!t) return;
+      if (t.dataset.tab === 'open') {
+        open(v, { trigger: 'tab' });
+      } else {
+        hideTab();
+        if (persist) store.set(K.tabOff, store.get(K.closedUntil) || String(Date.now() + 864e5));
+        variant = v;
+        track('popup_tab_hide');
+        document.dispatchEvent(new CustomEvent('pp-popup-closed'));
+      }
+    });
+    mount.appendChild(tab);
+    requestAnimationFrame(() => requestAnimationFrame(() => tab && tab.classList.add('is-open')));
+  }
+
+  function hideTab() {
+    if (tab) { tab.remove(); tab = null; }
   }
 
   function showDone() {
@@ -925,13 +1017,6 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 
   /* ---------- when to show ---------- */
 
-  function blocked() {
-    if (C.suppress) return true;
-    if (store.get(K.joined)) return true;
-    const until = Number(store.get(K.closedUntil) || 0);
-    return until > Date.now();
-  }
-
   function arm(v) {
     let fired = false;
     const timers = [];
@@ -975,6 +1060,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 
     window.PocketPopup = {
       open: (v, opts) => open(String(v).toUpperCase(), opts || { trigger: 'manual' }),
+      hideTab,
       close: () => close('api'),
       variant: () => variant,
       assign,
@@ -983,6 +1069,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
       destroy() {
         cleanups.splice(0).forEach((fn) => fn());
         if (root) { root.remove(); root = null; }
+        hideTab();
         document.documentElement.classList.remove('ppp-lock');
       },
     };
@@ -1010,9 +1097,16 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
 
     const forced = forcedVariant();
     if (forced) { open(forced, { trigger: 'url' }); return; }
-    if (blocked()) return;
+    if (C.suppress || store.get(K.joined)) return;
     const v = assign();
-    if (v) arm(v);
+    if (!v) return;
+    const now = Date.now();
+    if (Number(store.get(K.closedUntil) || 0) > now) {
+      // Closed recently: no popup, just the tab (unless they hid that too).
+      if (Number(store.get(K.tabOff) || 0) <= now) showTab(v);
+      return;
+    }
+    arm(v);
   }
 
   boot();
@@ -1053,6 +1147,11 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     { "type": "range", "id": "scroll", "label": "Or after scrolling this far (0 = off)", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40 },
     { "type": "checkbox", "id": "exit_intent", "label": "Or when the mouse heads for the browser tabs (computers only)", "default": true },
     { "type": "range", "id": "hide_days", "label": "After someone closes it, hide it for", "min": 1, "max": 60, "step": 1, "unit": "d", "default": 14 },
+    {
+      "type": "checkbox", "id": "tab", "label": "After closing, keep a small tab in the corner to reopen it", "default": true,
+      "info": "Visitors can hide the tab with its own x."
+    },
+    { "type": "text", "id": "tab_label", "label": "Tab text", "default": "Get $10 off" },
 
     { "type": "header", "content": "Words" },
     { "type": "text", "id": "eyebrow", "label": "Small label above the headline", "default": "✹ the pocket list" },

@@ -25,6 +25,9 @@ setting (words, discount code, test shares, timing, photo) can be changed in
 3. **Customize** the copy → **Footer → Add section → Newsletter popup**.
 4. Preview it. To see one design directly, add `?pp_popup=A` (or `B`, `C`) to any page address.
 5. Switch off the old Shopify Forms popup (Apps → Shopify Forms) so visitors don't get two.
+   Once the new one has run for a week or two without problems, you can uninstall Shopify Forms.
+   Before uninstalling, check it isn't used anywhere else on the site and that your welcome
+   email automation isn't set to trigger only from Shopify Forms.
 6. Publish the copy.
 
 ## How the A/B test works
@@ -51,6 +54,18 @@ setting (words, discount code, test shares, timing, photo) can be changed in
 - Give it 2–4 weeks, or about 100 sign-ups per design, before calling it.
 - **When you have a winner:** set the other two shares to 0. To test something new
   (e.g. two headlines), change the **Test name** so everyone is shuffled again.
+
+## When it appears
+
+Whichever happens first (all adjustable in the theme editor):
+
+- 8 seconds on the site
+- scrolling 40% down a page
+- on computers, the mouse heading up to leave the page (exit intent)
+
+After someone closes it, it stays away for 14 days. In that time a small
+**"Get $10 off" tab** sits in the bottom-left corner so they can reopen it.
+The tab has its own × to hide it. Both can be turned off or reworded.
 
 ### Who never sees it
 

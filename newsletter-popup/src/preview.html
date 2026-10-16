@@ -365,6 +365,7 @@ code { font: 500 12.5px var(--mono); background: var(--chip); padding: 1px 6px; 
 
   function show(opts) {
     again.hidden = true;
+    P.hideTab();
     P.open(state.v, opts || { trigger: 'preview' });
   }
 
@@ -397,7 +398,7 @@ code { font: 500 12.5px var(--mono); background: var(--chip); padding: 1px 6px; 
   document.getElementById('replay').addEventListener('click', () => show());
   document.getElementById('thanks').addEventListener('click', () => show({ success: true, silent: true }));
   again.addEventListener('click', () => show());
-  document.addEventListener('pp-popup-closed', () => { again.hidden = false; });
+  document.addEventListener('pp-popup-closed', () => { again.hidden = !!vp.querySelector('.ppp--tab'); });
 
   // test log
   const log = document.getElementById('log');
