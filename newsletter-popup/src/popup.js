@@ -515,30 +515,19 @@
     return tags.join(',');
   }
 
-  async function send(email, tags) {
+  // Sign-ups go through Shopify's own customer form as a normal page post,
+  // the same way the footer form works. A background (fetch) post was refused
+  // by the live store, and a real post also handles Shopify's captcha page.
+  async function send() {
     if (C.preview) {
       await new Promise((r) => setTimeout(r, 650));
       return 'ok';
     }
-    const fd = new FormData();
-    fd.append('form_type', 'customer');
-    fd.append('utf8', '✓');
-    fd.append('contact[email]', email);
-    fd.append('contact[tags]', tags);
-    try {
-      const res = await fetch(C.contactUrl || '/contact', {
-        method: 'POST', body: fd, credentials: 'same-origin', headers: { Accept: 'text/html' },
-      });
-      // Shopify sometimes asks for a captcha; that needs a real page load.
-      if (/\/challenge/.test(res.url)) return 'native';
-      return res.ok ? 'ok' : 'error';
-    } catch (e) {
-      return 'native';
-    }
+    return 'native';
   }
 
-  // Fallback: post the hidden Shopify form the normal way. The page reloads
-  // with ?customer_posted=true and boot() shows the success state.
+  // Post the hidden Shopify form. The page reloads on the same page and
+  // boot() shows the thank-you (or Shopify's error) in the same design.
   function nativeSubmit(email, tags) {
     const f = document.getElementById('pp-popup-native');
     if (!f) return false;
@@ -721,18 +710,33 @@
       return;
     }
 
-    // Back from the fallback form post: show the thank-you in the same design.
+    // Back from the form post: show the thank-you, or Shopify's message.
     const pending = store.get(K.pending);
-    if (pending && /[?&]customer_posted=true/.test(location.search)) {
+    if (pending) {
       store.del(K.pending);
-      store.set(K.joined, '1');
+      const state = document.getElementById('pp-popup-state');
+      const posted = /[?&]customer_posted=true/.test(location.search) || (state && state.dataset.posted === 'true');
+      const errText = state ? String(state.dataset.errors || '').trim() : '';
       let p = {};
       try { p = JSON.parse(pending); } catch (e) { /* ignore */ }
-      if (TEMPLATES[p.v]) {
+      // "Already taken" means they're on the list already, which is a success.
+      if (TEMPLATES[p.v] && (posted || /taken|already/i.test(errText))) {
+        store.set(K.joined, '1');
         open(p.v, { silent: true, success: true });
         track('popup_signup', { popup_choice: p.c || 'none' });
+        return;
       }
-      return;
+      if (TEMPLATES[p.v] && errText) {
+        open(p.v, { silent: true });
+        root.querySelectorAll('[data-step]').forEach((n) => { n.hidden = n.dataset.step !== 'form'; });
+        const t2 = root.querySelector('.ppp-c__title2, .ppp-d__title2');
+        if (t2) t2.textContent = C.headlineA || 'Get first dibs on new lamps.';
+        root.querySelectorAll('.ppp-c__chosen, .ppp-d__pick').forEach((n) => { n.hidden = true; });
+        const err = root.querySelector('.ppp__err');
+        if (err) { err.textContent = errText; err.hidden = false; }
+        track('popup_error', { popup_error: errText.slice(0, 90) });
+        return;
+      }
     }
 
     const forced = forcedVariant();

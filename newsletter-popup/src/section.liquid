@@ -107,6 +107,7 @@
     {%- form 'customer', id: 'pp-popup-native' -%}
       <input type="hidden" name="contact[email]" value="">
       <input type="hidden" name="contact[tags]" value="newsletter">
+      <span id="pp-popup-state" data-posted="{{ form.posted_successfully? }}" data-errors="{{ form.errors | default_errors | strip_html | strip | escape }}"></span>
     {%- endform -%}
   </div>
 
