@@ -32,8 +32,7 @@
         "A": {{ s.weight_a | json }}, "B": {{ s.weight_b | json }}, "C": {{ s.weight_c | json }},
         "D": {{ s.weight_d | json }}, "E": {{ s.weight_e | json }}
       },
-      "gaId": {{ s.ga_id | strip | json }},
-      "editorVariant": {{ s.editor_variant | json }},
+      "gaId": "G-6YMG5LFDHB",
       "designMode": {{ request.design_mode | json }},
       "suppress": {{ suppress | json }},
       "delay": {{ s.delay | json }},
@@ -43,26 +42,26 @@
       "mobileExit": {{ s.mobile_exit | json }},
       "hideDays": {{ s.hide_days | json }},
       "tab": {{ s.tab | json }},
-      "tabLabel": {{ s.tab_label | json }},
+
       "eyebrow": {{ s.eyebrow | json }},
-      "marquee": {{ s.marquee | json }},
+
       "headlineA": {{ s.headline_a | json }},
       "headlineB": {{ s.headline_b | json }},
       "headlineC": {{ s.headline_c | json }},
-      "headlineC2": {{ s.headline_c2 | json }},
+
       "headlineD": {{ s.headline_d | json }},
-      "headlineD2": {{ s.headline_d2 | json }},
-      "bodyD": {{ s.body_d | json }},
+
       "headlineE": {{ s.headline_e | json }},
-      "buttonE": {{ s.button_e | json }},
+
       "receipt": {{ s.receipt | json }},
       "rooms": [
         {%- for i in (1..4) -%}
           {%- liquid
             assign k = 'room_' | append: i
-            assign k_name = k | append: '_name'
-            assign k_mood = k | append: '_mood'
             assign k_product = k | append: '_product'
+            assign room_parts = s[k] | split: '|'
+            assign room_name = room_parts[0] | strip
+            assign room_mood = room_parts[1] | strip
             assign room_product = s[k_product]
             if room_product == blank
               case i
@@ -78,9 +77,9 @@
             endif
           -%}
           {
-            "id": {{ s[k_name] | handleize | json }},
-            "name": {{ s[k_name] | json }},
-            "mood": {{ s[k_mood] | json }},
+            "id": {{ room_name | handleize | json }},
+            "name": {{ room_name | json }},
+            "mood": {{ room_mood | json }},
             "product": {{ room_product.title | json }},
             "price": {{ room_product.price | money | strip_html | json }},
             "url": {{ room_product.url | json }},
@@ -95,9 +94,9 @@
       "successTitle": {{ s.success_title | json }},
       "successBody": {{ s.success_body | json }},
       "code": {{ s.discount_code | strip | json }},
-      "extraTags": {{ s.extra_tags | json }},
+      "extraTags": "customer-code",
       "shopLabel": {{ s.shop_label | json }},
-      "shopUrl": {{ s.shop_link | default: routes.all_products_collection_url | json }},
+      "shopUrl": {{ routes.all_products_collection_url | json }},
       "imageB": {% if image_b != blank %}{{ image_b | image_url: width: 900 | json }}{% else %}""{% endif %},
       "collectionsUrl": {{ routes.collections_url | json }},
       "contactUrl": {{ contact_url | json }}
@@ -120,120 +119,312 @@
   "name": "Newsletter popup",
   "class": "pp-popup-section",
   "settings": [
-    { "type": "header", "content": "Turn on and A/B test" },
-    { "type": "checkbox", "id": "enabled", "label": "Show the popup", "default": true },
     {
-      "type": "text", "id": "experiment", "label": "Test name", "default": "popup-test-1",
+      "type": "header",
+      "content": "Turn on and A/B test"
+    },
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Show the popup",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "experiment",
+      "label": "Test name",
+      "default": "popup-test-1",
       "info": "Change this name to start a brand-new test. Every visitor is shuffled into a design again."
     },
-    { "type": "range", "id": "weight_a", "label": "Design A · Pocket Pop (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
-    { "type": "range", "id": "weight_b", "label": "Design B · Lights On (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
-    { "type": "range", "id": "weight_c", "label": "Design C · Colour Pick (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
-    { "type": "range", "id": "weight_d", "label": "Design D · Room Match (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
-    { "type": "range", "id": "weight_e", "label": "Design E · Print Job (share of visitors)", "min": 0, "max": 100, "step": 1, "unit": "%", "default": 20 },
+    {
+      "type": "range",
+      "id": "weight_a",
+      "label": "Design A · Pocket Pop (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "weight_b",
+      "label": "Design B · Lights On (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "weight_c",
+      "label": "Design C · Colour Pick (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "weight_d",
+      "label": "Design D · Room Match (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "weight_e",
+      "label": "Design E · Print Job (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
     {
       "type": "paragraph",
-      "content": "Set a design to 0 to switch it off. When you have a winner, set the other two to 0."
+      "content": "Set a design to 0 to switch it off. When you have a winner, set the others to 0. While editing here, the design with the biggest share is shown."
     },
     {
-      "type": "select", "id": "editor_variant", "label": "Design to show while editing",
-      "options": [
-        { "value": "A", "label": "A · Pocket Pop" },
-        { "value": "B", "label": "B · Lights On" },
-        { "value": "C", "label": "C · Colour Pick" },
-        { "value": "D", "label": "D · Room Match" },
-        { "value": "E", "label": "E · Print Job" }
-      ],
-      "default": "A"
+      "type": "header",
+      "content": "When it appears"
     },
     {
-      "type": "text", "id": "ga_id", "label": "Google Analytics ID", "default": "G-6YMG5LFDHB",
-      "info": "Views, closes and sign-ups are sent here, named like popup_signup_b. Leave empty to send nothing."
+      "type": "range",
+      "id": "delay",
+      "label": "After this many seconds (0 = off)",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "s",
+      "default": 8
     },
-
-    { "type": "header", "content": "When it appears" },
-    { "type": "range", "id": "delay", "label": "After this many seconds (0 = off)", "min": 0, "max": 60, "step": 1, "unit": "s", "default": 8 },
-    { "type": "range", "id": "scroll", "label": "Or after scrolling this far (0 = off)", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40 },
-    { "type": "checkbox", "id": "exit_intent", "label": "Or when the mouse heads for the browser tabs (computers only)", "default": true },
     {
-      "type": "range", "id": "mobile_delay", "label": "On phones, after this many seconds (0 = off)", "min": 0, "max": 60, "step": 1, "unit": "s", "default": 12,
+      "type": "range",
+      "id": "scroll",
+      "label": "Or after scrolling this far (0 = off)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "exit_intent",
+      "label": "Or when the mouse heads for the browser tabs (computers only)",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "mobile_delay",
+      "label": "On phones, after this many seconds (0 = off)",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "s",
+      "default": 12,
       "info": "A little longer than on computers, so phone visitors from Google see the page first."
     },
-    { "type": "checkbox", "id": "mobile_exit", "label": "On phones, when someone flicks quickly back up the page (like they're about to leave)", "default": true },
-    { "type": "range", "id": "hide_days", "label": "After someone closes it, hide it for", "min": 1, "max": 60, "step": 1, "unit": "d", "default": 14 },
     {
-      "type": "checkbox", "id": "tab", "label": "After closing, keep a small tab in the corner to reopen it", "default": true,
+      "type": "checkbox",
+      "id": "mobile_exit",
+      "label": "On phones, when someone flicks quickly back up the page (like they're about to leave)",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hide_days",
+      "label": "After someone closes it, hide it for",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "unit": "d",
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "tab",
+      "label": "After closing, keep a small tab in the corner to reopen it",
+      "default": true,
       "info": "Visitors can hide the tab with its own x."
     },
-    { "type": "text", "id": "tab_label", "label": "Tab text", "default": "Get $10 off" },
-
-    { "type": "header", "content": "Words" },
-    { "type": "text", "id": "eyebrow", "label": "Small label above the headline", "default": "✹ the pocket list" },
-    { "type": "text", "id": "headline_a", "label": "Headline for A", "default": "Get first dibs on new lamps." },
-    { "type": "text", "id": "headline_b", "label": "Headline for B", "default": "Be first to the glow." },
-    { "type": "text", "id": "headline_c", "label": "Colour question for C", "default": "What's your colour?" },
     {
-      "type": "text", "id": "headline_c2", "label": "C headline after picking", "default": "Good pick. [colour] it is.",
-      "info": "[colour] is swapped for the colour they chose. The colours are your best sellers by vendor (Coffee, Lemon, Maple, Natural, Mandarin, Oatmeal, Spearmint), and the thank-you button opens that colour's collection."
+      "type": "header",
+      "content": "Words"
     },
     {
-      "type": "textarea", "id": "body", "label": "Description",
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label above the headline",
+      "default": "✹ the pocket list"
+    },
+    {
+      "type": "text",
+      "id": "headline_a",
+      "label": "Headline for A",
+      "default": "Get first dibs on new lamps."
+    },
+    {
+      "type": "text",
+      "id": "headline_b",
+      "label": "Headline for B",
+      "default": "Be first to the glow."
+    },
+    {
+      "type": "text",
+      "id": "headline_c",
+      "label": "Colour question for C",
+      "default": "What's your colour?"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Description",
       "default": "Our monthly newsletter: new designs, fresh colours and early-bird specials, straight from the Melbourne studio."
     },
-    { "type": "text", "id": "offer", "label": "Offer line (leave empty for none)", "default": "$10 off your first order over $100" },
-    { "type": "text", "id": "marquee", "label": "Scrolling strip text (A)", "default": "new designs ✹ fresh colours ✹ early-bird specials ✹ made in melbourne ✹" },
-    { "type": "text", "id": "button", "label": "Button", "default": "Join the list" },
-    { "type": "text", "id": "fine", "label": "Small print", "default": "No spam. Unsubscribe anytime." },
-
-    { "type": "header", "content": "Design D · Room Match" },
-    { "type": "text", "id": "headline_d", "label": "Room question", "default": "Where's your next lamp going?" },
     {
-      "type": "text", "id": "headline_d2", "label": "Headline after picking", "default": "[room] it is.",
-      "info": "[room] is swapped for the room they chose."
+      "type": "text",
+      "id": "offer",
+      "label": "Offer line (leave empty for none)",
+      "default": "$10 off your first order over $100"
     },
-    { "type": "textarea", "id": "body_d", "label": "Description after picking", "default": "Tell us the room and we'll send lamp ideas that suit it, plus first dibs on new designs." },
-    { "type": "text", "id": "room_1_name", "label": "Room 1", "default": "Living room" },
-    { "type": "text", "id": "room_1_mood", "label": "Room 1 mood", "default": "cosy & warm" },
-    { "type": "product", "id": "room_1_product", "label": "Room 1 lamp", "info": "Defaults to the Mocha Lamp." },
-    { "type": "text", "id": "room_2_name", "label": "Room 2", "default": "Bedroom" },
-    { "type": "text", "id": "room_2_mood", "label": "Room 2 mood", "default": "calm & soft" },
-    { "type": "product", "id": "room_2_product", "label": "Room 2 lamp", "info": "Defaults to the Bubble Lamp." },
-    { "type": "text", "id": "room_3_name", "label": "Room 3", "default": "Desk" },
-    { "type": "text", "id": "room_3_mood", "label": "Room 3 mood", "default": "bright & focused" },
-    { "type": "product", "id": "room_3_product", "label": "Room 3 lamp", "info": "Defaults to the Limoncello Lamp." },
-    { "type": "text", "id": "room_4_name", "label": "Room 4", "default": "Dining" },
-    { "type": "text", "id": "room_4_mood", "label": "Room 4 mood", "default": "moody glow" },
-    { "type": "product", "id": "room_4_product", "label": "Room 4 lamp", "info": "Defaults to the Astro Pendant Lamp." },
-
-    { "type": "header", "content": "Design E · Print Job" },
-    { "type": "text", "id": "headline_e", "label": "Headline", "default": "Print yourself $10 off." },
-    { "type": "text", "id": "button_e", "label": "Button", "default": "Start print" },
     {
-      "type": "textarea", "id": "receipt", "label": "Receipt lines",
+      "type": "text",
+      "id": "button",
+      "label": "Button",
+      "default": "Join the list"
+    },
+    {
+      "type": "text",
+      "id": "fine",
+      "label": "Small print",
+      "default": "No spam. Unsubscribe anytime."
+    },
+    {
+      "type": "header",
+      "content": "Design D · Room Match"
+    },
+    {
+      "type": "text",
+      "id": "headline_d",
+      "label": "Room question",
+      "default": "Where's your next lamp going?"
+    },
+    {
+      "type": "text",
+      "id": "room_1",
+      "label": "Room 1 (name | mood)",
+      "default": "Living room | cosy & warm"
+    },
+    {
+      "type": "product",
+      "id": "room_1_product",
+      "label": "Room 1 lamp",
+      "info": "Defaults to the Mocha Lamp."
+    },
+    {
+      "type": "text",
+      "id": "room_2",
+      "label": "Room 2 (name | mood)",
+      "default": "Bedroom | calm & soft"
+    },
+    {
+      "type": "product",
+      "id": "room_2_product",
+      "label": "Room 2 lamp",
+      "info": "Defaults to the Bubble Lamp."
+    },
+    {
+      "type": "text",
+      "id": "room_3",
+      "label": "Room 3 (name | mood)",
+      "default": "Desk | bright & focused"
+    },
+    {
+      "type": "product",
+      "id": "room_3_product",
+      "label": "Room 3 lamp",
+      "info": "Defaults to the Limoncello Lamp."
+    },
+    {
+      "type": "text",
+      "id": "room_4",
+      "label": "Room 4 (name | mood)",
+      "default": "Dining | moody glow"
+    },
+    {
+      "type": "product",
+      "id": "room_4_product",
+      "label": "Room 4 lamp",
+      "info": "Defaults to the Astro Pendant Lamp."
+    },
+    {
+      "type": "header",
+      "content": "Design E · Print Job"
+    },
+    {
+      "type": "text",
+      "id": "headline_e",
+      "label": "Headline",
+      "default": "Print yourself $10 off."
+    },
+    {
+      "type": "textarea",
+      "id": "receipt",
+      "label": "Receipt lines",
       "default": "Item | $10 off\nMin. spend | $100\nMade in | Melbourne\nStatus | waiting on you",
       "info": "One line each, written as: label | value"
     },
-
-    { "type": "header", "content": "After sign-up" },
-    { "type": "text", "id": "success_title", "label": "Thank-you headline", "default": "You're on the list ✹" },
-    { "type": "textarea", "id": "success_body", "label": "Thank-you message", "default": "Welcome in. Here is your $10 off, and new lamps will land in your inbox first." },
     {
-      "type": "text", "id": "discount_code", "label": "Discount code to show (optional)", "default": "POCKET3141",
+      "type": "header",
+      "content": "After sign-up"
+    },
+    {
+      "type": "text",
+      "id": "success_title",
+      "label": "Thank-you headline",
+      "default": "You're on the list ✹"
+    },
+    {
+      "type": "textarea",
+      "id": "success_body",
+      "label": "Thank-you message",
+      "default": "Welcome in. Here is your $10 off, and new lamps will land in your inbox first."
+    },
+    {
+      "type": "text",
+      "id": "discount_code",
+      "label": "Discount code to show (optional)",
+      "default": "POCKET3141",
       "info": "Must match a code under Discounts. Leave empty to show no code."
     },
     {
-      "type": "text", "id": "extra_tags", "label": "Extra customer tags", "default": "customer-code",
-      "info": "Added to everyone who signs up, as well as popup-A / popup-B / popup-C. Separate with commas."
+      "type": "text",
+      "id": "shop_label",
+      "label": "Shop button",
+      "default": "Shop lamps"
     },
-    { "type": "text", "id": "shop_label", "label": "Shop button", "default": "Shop lamps" },
-    { "type": "url", "id": "shop_link", "label": "Shop button link" },
-
-    { "type": "header", "content": "Design B photo" },
     {
-      "type": "image_picker", "id": "image_b", "label": "Lamp photo",
+      "type": "header",
+      "content": "Design B photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_b",
+      "label": "Lamp photo",
       "info": "A lit lamp works best: it starts dark and flickers on. Defaults to the Limoncello Lamp."
     }
   ],
-  "presets": [{ "name": "Newsletter popup" }]
+  "presets": [
+    {
+      "name": "Newsletter popup"
+    }
+  ]
 }
 {% endschema %}

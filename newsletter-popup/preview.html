@@ -1266,7 +1266,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
             <div class="ppp-d__form">
               <button type="button" class="ppp-c__chosen" data-back><i></i><span></span><small>change</small></button>
               <h2 class="ppp__title ppp-d__title2" tabindex="-1"></h2>
-              <p class="ppp__body">${esc(C.bodyD || C.body)}</p>
+              <p class="ppp__body">${esc(C.bodyD || 'Tell us the room and we\u2019ll send lamp ideas that suit it, plus first dibs on new designs.')}</p>
               ${offer()}
               ${formHTML()}
             </div>
@@ -1278,14 +1278,14 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     E: () => `
       <div class="ppp__scrim ppp__scrim--light" data-close="scrim"></div>
       <div class="ppp-e__wrap">
-        <div class="ppp-e__head" aria-hidden="true"><i></i><span>${esc(C.printerName || 'pocket-01 · melbourne')}</span></div>
+        <div class="ppp-e__head" aria-hidden="true"><i></i><span>${esc(C.printerName || 'pocket-01 \u00b7 melbourne')}</span></div>
         <div class="ppp__card ppp-e" role="dialog" aria-modal="true" aria-labelledby="ppp-title" tabindex="-1">
           ${closeBtn}
           <div class="ppp__main">
             <p class="ppp-e__job">Print job #${esc(jobNumber())}</p>
             <h2 class="ppp__title" id="ppp-title">${esc(C.headlineE)}</h2>
             <dl class="ppp-e__rows">${receiptRows()}</dl>
-            ${formHTML(C.buttonE)}
+            ${formHTML(C.buttonE || 'Start print')}
             <div class="ppp-e__progress" hidden aria-hidden="true">
               <span class="ppp-e__bar"><i></i></span><span class="ppp-e__pct">printing 0%</span>
             </div>
@@ -1714,7 +1714,9 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     if (C.preview || C.enabled === false) return;
 
     if (C.designMode) {
-      open(C.editorVariant || 'A', { silent: true });
+      // In the theme editor, show the design with the biggest share.
+      const top = weights().sort((x, y) => y.w - x.w)[0];
+      open(C.editorVariant || (top ? top.id : 'A'), { silent: true });
       return;
     }
 
