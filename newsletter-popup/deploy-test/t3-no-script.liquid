@@ -1,0 +1,1079 @@
+{%- comment -%}
+  Pocket newsletter popup with A/B/C testing.
+  Built from newsletter-popup/src by build.py. Edit the src files, not this one.
+{%- endcomment -%}
+{%- liquid
+  assign s = section.settings
+  assign suppress = false
+  if customer and customer.accepts_marketing
+    assign suppress = true
+  endif
+  if template.name == 'cart' or template.name == 'password' or template.directory == 'customers'
+    assign suppress = true
+  endif
+
+  assign image_b = s.image_b
+  if image_b == blank
+    assign image_b = all_products['limoncello-lamp'].featured_image
+  endif
+
+  if routes.root_url == '/'
+    assign contact_url = '/contact'
+  else
+    assign contact_url = routes.root_url | append: '/contact'
+  endif
+-%}
+{%- if s.enabled -%}
+  <script type="application/json" id="pp-popup-config">
+    {
+      "enabled": true,
+      "experiment": {{ s.experiment | default: 'popup-test-1' | handleize | json }},
+      "weights": {
+        "A": {{ s.weight_a | json }}, "B": {{ s.weight_b | json }}, "C": {{ s.weight_c | json }},
+        "D": {{ s.weight_d | json }}, "E": {{ s.weight_e | json }}
+      },
+      "gaId": "G-6YMG5LFDHB",
+      "designMode": {{ request.design_mode | json }},
+      "suppress": {{ suppress | json }},
+      "delay": {{ s.delay | json }},
+      "scroll": {{ s.scroll | json }},
+      "exitIntent": {{ s.exit_intent | json }},
+      "mobileDelay": {{ s.mobile_delay | json }},
+      "mobileExit": {{ s.mobile_exit | json }},
+      "hideDays": {{ s.hide_days | json }},
+      "tab": {{ s.tab | json }},
+
+      "eyebrow": {{ s.eyebrow | json }},
+
+      "headlineA": {{ s.headline_a | json }},
+      "headlineB": {{ s.headline_b | json }},
+      "headlineC": {{ s.headline_c | json }},
+
+      "headlineD": {{ s.headline_d | json }},
+
+      "headlineE": {{ s.headline_e | json }},
+
+      "receipt": {{ s.receipt | json }},
+      "rooms": [
+        {%- for i in (1..4) -%}
+          {%- liquid
+            assign k = 'room_' | append: i
+            assign k_product = k | append: '_product'
+            assign room_parts = s[k] | split: '|'
+            assign room_name = room_parts[0] | strip
+            assign room_mood = room_parts[1] | strip
+            assign room_product = s[k_product]
+            if room_product == blank
+              case i
+                when 1
+                  assign room_product = all_products['mocha-lamp']
+                when 2
+                  assign room_product = all_products['bubble-lamp-natural']
+                when 3
+                  assign room_product = all_products['limoncello-lamp']
+                when 4
+                  assign room_product = all_products['astro-pendant-lamp']
+              endcase
+            endif
+          -%}
+          {
+            "id": {{ room_name | handleize | json }},
+            "name": {{ room_name | json }},
+            "mood": {{ room_mood | json }},
+            "product": {{ room_product.title | json }},
+            "price": {{ room_product.price | money | strip_html | json }},
+            "url": {{ room_product.url | json }},
+            "image": {% if room_product.featured_image %}{{ room_product.featured_image | image_url: width: 600 | json }}{% else %}""{% endif %}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ],
+      "body": {{ s.body | json }},
+      "offer": {{ s.offer | json }},
+      "button": {{ s.button | json }},
+      "fine": {{ s.fine | json }},
+      "successTitle": {{ s.success_title | json }},
+      "successBody": {{ s.success_body | json }},
+      "code": {{ s.discount_code | strip | json }},
+      "extraTags": "customer-code",
+      "shopLabel": {{ s.shop_label | json }},
+      "shopUrl": {{ routes.all_products_collection_url | json }},
+      "imageB": {% if image_b != blank %}{{ image_b | image_url: width: 900 | json }}{% else %}""{% endif %},
+      "collectionsUrl": {{ routes.collections_url | json }},
+      "contactUrl": {{ contact_url | json }}
+    }
+  </script>
+
+  <div hidden>
+    {%- form 'customer', id: 'pp-popup-native' -%}
+      <input type="hidden" name="contact[email]" value="">
+      <input type="hidden" name="contact[tags]" value="newsletter">
+    {%- endform -%}
+  </div>
+
+  <style>{% raw %}/* Pocket Picked It newsletter popup. Everything is scoped under .ppp so it
+   can't leak into the theme. Colours and fonts mirror the live store:
+   Poppins headings, the theme's mono body face, orange halo buttons, cream. */
+.ppp {
+  --pp-ink: #1d1c1c;
+  --pp-paper: #ffffff;
+  --pp-cream: #ffefd9;
+  --pp-orange: #fbb658;
+  --pp-orange-deep: #f6a43a;
+  --pp-halo: rgba(251, 182, 88, 0.42);
+  --pp-label: #fdfbf7;
+  --pp-coral: #e5483f;
+  --pp-muted: rgba(29, 28, 28, 0.66);
+  --pp-line: rgba(29, 28, 28, 0.2);
+  --pp-dot1: #d77103;
+  --pp-dot2: #fbb657;
+  --pp-dot3: #697b2f;
+  --pp-dot4: #577e85;
+  --pp-head: var(--font-heading-family, Poppins, ui-sans-serif, system-ui, sans-serif);
+  --pp-mono: var(--font-body-family, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace);
+  --pp-ease: cubic-bezier(0.2, 0.9, 0.25, 1.12);
+
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  font-family: var(--pp-mono);
+  color: var(--pp-ink);
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+}
+.ppp *, .ppp *::before, .ppp *::after { box-sizing: border-box; }
+.ppp [hidden] { display: none !important; }
+html.ppp-lock, html.ppp-lock body { overflow: hidden; }
+
+.ppp__sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ---------- shell ---------- */
+.ppp--a, .ppp--b {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.ppp__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(29, 28, 28, 0.45);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: auto;
+  touch-action: none;
+}
+.ppp.is-open .ppp__scrim { opacity: 1; }
+
+.ppp__card {
+  position: relative;
+  pointer-events: auto;
+  background: var(--pp-paper);
+  color: var(--pp-ink);
+  border-radius: 28px;
+  box-shadow: 0 30px 80px -24px rgba(29, 28, 28, 0.5), 0 0 0 1px rgba(29, 28, 28, 0.05);
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+  transition: opacity 0.28s ease, transform 0.5s var(--pp-ease);
+  outline: none;
+  max-height: calc(100% - 8px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.ppp.is-open .ppp__card { opacity: 1; transform: none; }
+.ppp.is-closing .ppp__card { transition-duration: 0.2s; transform: translateY(10px) scale(0.98); }
+
+.ppp__x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(29, 28, 28, 0.07);
+  color: var(--pp-ink);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.ppp__x:hover { background: rgba(29, 28, 28, 0.13); transform: rotate(90deg); }
+.ppp__x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+
+/* ---------- type ---------- */
+.ppp__main, .ppp__done { display: flex; flex-direction: column; gap: 14px; }
+.ppp__eyebrow {
+  margin: 0;
+  font: 700 11px/1.3 var(--pp-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.ppp__title {
+  margin: 0;
+  font-family: var(--pp-head);
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  outline: none;
+}
+.ppp__body {
+  margin: 0;
+  font: 400 14px/1.6 var(--pp-mono);
+  color: var(--pp-muted);
+  text-wrap: pretty;
+}
+.ppp__offer {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 7px 14px;
+  border-radius: 16px;
+  background: var(--pp-cream);
+  font: 700 13px/1.3 var(--pp-mono);
+}
+.ppp__offer span { color: var(--pp-dot1); }
+
+/* ---------- form ---------- */
+.ppp__form { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+.ppp__input {
+  width: 100%;
+  height: 52px;
+  padding: 0 22px;
+  border: 1.5px solid var(--pp-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--pp-ink);
+  font: 400 16px var(--pp-mono); /* 16px stops iPhones zooming in on tap */
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.ppp__input::placeholder { color: rgba(29, 28, 28, 0.42); }
+.ppp__input:focus { border-color: var(--pp-ink); box-shadow: 0 0 0 4px var(--pp-halo); }
+.ppp__input[aria-invalid="true"] { border-color: var(--pp-coral); }
+
+.ppp__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 12px);
+  height: 50px;
+  margin: 6px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pp-orange);
+  color: var(--pp-label);
+  box-shadow: 0 0 0 6px var(--pp-halo);
+  font: 700 16px var(--pp-mono);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+.ppp__btn:hover { background: var(--pp-orange-deep); box-shadow: 0 0 0 8px var(--pp-halo); }
+.ppp__btn:active { transform: translateY(1px); }
+.ppp__btn:focus-visible { outline: 2px solid var(--pp-ink); outline-offset: 9px; }
+.ppp__btn:disabled { cursor: progress; opacity: 0.8; }
+.ppp__err { margin: 0; color: var(--pp-coral); font: 700 12.5px/1.5 var(--pp-mono); }
+.ppp__fine { margin: 0; color: var(--pp-muted); font: 400 11.5px/1.5 var(--pp-mono); }
+
+/* ---------- success ---------- */
+.ppp__done { align-items: flex-start; }
+.ppp__done-dots, .ppp-a__dots { display: flex; gap: 8px; }
+.ppp__done-dots i, .ppp-a__dots i {
+  width: 16px; height: 16px; border-radius: 50%; display: block;
+}
+.ppp__done-dots i:nth-child(1), .ppp-a__dots i:nth-child(1) { background: var(--pp-dot1); }
+.ppp__done-dots i:nth-child(2), .ppp-a__dots i:nth-child(2) { background: var(--pp-dot2); }
+.ppp__done-dots i:nth-child(3), .ppp-a__dots i:nth-child(3) { background: var(--pp-dot3); }
+.ppp__done-dots i:nth-child(4), .ppp-a__dots i:nth-child(4) { background: var(--pp-dot4); }
+.ppp.is-open .ppp-a__dots i, .ppp__done:not([hidden]) .ppp__done-dots i { animation: ppp-pop 0.55s var(--pp-ease) both; }
+.ppp-a__dots i:nth-child(2), .ppp__done-dots i:nth-child(2) { animation-delay: 0.08s !important; }
+.ppp-a__dots i:nth-child(3), .ppp__done-dots i:nth-child(3) { animation-delay: 0.16s !important; }
+.ppp-a__dots i:nth-child(4), .ppp__done-dots i:nth-child(4) { animation-delay: 0.24s !important; }
+@keyframes ppp-pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+.ppp__code { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.ppp__code-label { font: 700 11px var(--pp-mono); letter-spacing: 0.14em; text-transform: uppercase; }
+.ppp__code-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 18px;
+  border: 1.5px dashed var(--pp-ink);
+  border-radius: 14px;
+  background: var(--pp-cream);
+  color: var(--pp-ink);
+  cursor: pointer;
+  font-family: var(--pp-mono);
+}
+.ppp__code-btn b { font-size: 18px; letter-spacing: 0.08em; user-select: all; }
+.ppp__code-btn small { font-size: 12px; text-decoration: underline; }
+.ppp__btn--link { margin-top: 8px; }
+
+/* ---------- A · Pocket Pop ---------- */
+.ppp-a { width: min(460px, 100%); }
+.ppp-a__band {
+  height: 42px;
+  overflow: hidden;
+  background: var(--pp-cream);
+  display: flex;
+  align-items: center;
+  border-radius: 28px 28px 0 0;
+}
+.ppp-a__track {
+  display: flex;
+  flex: none;
+  white-space: nowrap;
+  font: 700 15px var(--pp-mono);
+  animation: ppp-marquee 22s linear infinite;
+}
+@keyframes ppp-marquee { to { transform: translateX(-50%); } }
+.ppp-a .ppp__x { top: 56px; }
+.ppp-a .ppp__inner { padding: 30px 40px 34px; }
+.ppp-a .ppp__main, .ppp-a .ppp__done { align-items: center; text-align: center; }
+.ppp-a .ppp__offer { align-self: center; }
+.ppp-a .ppp__form { width: 100%; }
+.ppp-a .ppp__body { max-width: 34ch; }
+.ppp-a__dots { margin-bottom: 4px; }
+
+/* ---------- B · Lights On ---------- */
+.ppp-b {
+  width: min(840px, 100%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 500px;
+  overflow: hidden;
+}
+.ppp-b__media { position: relative; overflow: hidden; background: #2a2724; min-height: 220px; }
+.ppp-b__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  filter: brightness(0.3) saturate(0.45);
+}
+.ppp-b__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 50% at 50% 42%, rgba(255, 196, 92, 0.38), transparent 70%);
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+.ppp-b.ppp-b--noimg .ppp-b__media { background: var(--pp-cream); display: grid; place-items: center; }
+.ppp-b__bigdots { display: grid; grid-template-columns: repeat(2, 64px); gap: 14px; }
+.ppp-b__bigdots i { width: 64px; height: 64px; border-radius: 50%; display: block; }
+.ppp-b__bigdots i:nth-child(1) { background: var(--pp-dot1); }
+.ppp-b__bigdots i:nth-child(2) { background: var(--pp-dot2); }
+.ppp-b__bigdots i:nth-child(3) { background: var(--pp-dot3); }
+.ppp-b__bigdots i:nth-child(4) { background: var(--pp-dot4); }
+.ppp-b__tag {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  font: 700 11px var(--pp-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ppp-b__tag i { width: 9px; height: 9px; border-radius: 50%; background: #9a958e; transition: background 0.2s, box-shadow 0.2s; }
+.ppp-b__on { display: none; }
+.ppp.is-lit .ppp-b__on { display: inline; }
+.ppp.is-lit .ppp-b__off { display: none; }
+.ppp.is-lit .ppp-b__tag i { background: var(--pp-orange); box-shadow: 0 0 0 4px var(--pp-halo); }
+.ppp.is-lit .ppp-b__media img { animation: ppp-flicker 1.1s linear forwards; }
+.ppp.is-lit .ppp-b__glow { animation: ppp-glow 1.1s linear forwards; }
+@keyframes ppp-flicker {
+  0% { filter: brightness(0.3) saturate(0.45); }
+  8% { filter: brightness(1.05) saturate(1); }
+  14% { filter: brightness(0.38) saturate(0.5); }
+  26% { filter: brightness(1) saturate(1); }
+  32% { filter: brightness(0.62) saturate(0.8); }
+  44%, 100% { filter: brightness(1) saturate(1); }
+}
+@keyframes ppp-glow { 0%, 40% { opacity: 0; } 100% { opacity: 1; } }
+
+.ppp-b__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px 44px 40px;
+  background: var(--pp-cream);
+}
+.ppp-b .ppp__offer { background: var(--pp-paper); }
+.ppp-b .ppp__x { background: rgba(255, 255, 255, 0.7); }
+.ppp-b .ppp__title { font-size: 36px; }
+
+/* ---------- C · Colour Pick ---------- */
+.ppp-c {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: 372px;
+  max-width: calc(100% - 32px);
+  max-height: calc(100% - 48px);
+  padding: 26px 24px 24px;
+  border-radius: 26px;
+  transform: translateY(28px);
+  box-shadow: 0 24px 60px -20px rgba(29, 28, 28, 0.45), 0 0 0 1.5px var(--pp-ink);
+}
+.ppp-c .ppp__x { top: 12px; right: 12px; width: 32px; height: 32px; }
+.ppp-c .ppp__title { font-size: 26px; padding-right: 30px; }
+.ppp-c__step { display: flex; flex-direction: column; gap: 14px; }
+.ppp-c__swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px 6px;
+  margin-top: 4px;
+}
+.ppp-c__sw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--pp-ink);
+  cursor: pointer;
+  font: 400 11px var(--pp-mono);
+}
+.ppp-c__sw i {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: block;
+  background: var(--sw);
+  box-shadow: inset 0 0 0 1px rgba(29, 28, 28, 0.12);
+  transition: transform 0.2s var(--pp-ease), box-shadow 0.2s ease;
+}
+.ppp-c__sw--all i {
+  background: conic-gradient(#d4b89b, #f7e569, #c68642, #a69f8e, #ff8243, #eeddb2, #7ab87f, #d4b89b);
+}
+.ppp-c__sw:hover i { transform: scale(1.1); }
+.ppp-c__sw:focus-visible { outline: none; }
+.ppp-c__sw:focus-visible i { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--pp-ink); }
+.ppp.is-open .ppp-c__sw i { animation: ppp-pop 0.5s var(--pp-ease) both; }
+.ppp-c__sw:nth-child(2) i { animation-delay: 0.04s !important; }
+.ppp-c__sw:nth-child(3) i { animation-delay: 0.08s !important; }
+.ppp-c__sw:nth-child(4) i { animation-delay: 0.12s !important; }
+.ppp-c__sw:nth-child(5) i { animation-delay: 0.16s !important; }
+.ppp-c__sw:nth-child(6) i { animation-delay: 0.2s !important; }
+.ppp-c__sw:nth-child(7) i { animation-delay: 0.24s !important; }
+.ppp-c__sw:nth-child(8) i { animation-delay: 0.28s !important; }
+
+.ppp-c__chosen {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border: 1.5px solid var(--pp-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--pp-ink);
+  cursor: pointer;
+  font: 700 12px var(--pp-mono);
+}
+.ppp-c__chosen i { width: 22px; height: 22px; border-radius: 50%; background: var(--pick); box-shadow: inset 0 0 0 1px rgba(29, 28, 28, 0.12); }
+.ppp-c--all .ppp-c__chosen i { background: conic-gradient(#d4b89b, #f7e569, #c68642, #a69f8e, #ff8243, #eeddb2, #7ab87f, #d4b89b); }
+.ppp-c__chosen small { font-weight: 400; text-decoration: underline; color: var(--pp-muted); }
+.ppp-c .ppp__body { font-size: 13px; }
+.ppp-c .ppp__done .ppp__title { font-size: 26px; }
+
+/* ---------- D · Room Match ---------- */
+.ppp--d, .ppp--e { display: grid; place-items: center; padding: 24px; }
+.ppp-d { width: min(820px, 100%); padding: 34px 34px 30px; }
+.ppp-d .ppp__title { padding-right: 40px; }
+.ppp-d__step { display: flex; flex-direction: column; gap: 14px; }
+.ppp-d__rooms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 6px; }
+.ppp-d__room {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pp-ink);
+  text-align: left;
+  cursor: pointer;
+}
+.ppp-d__img {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  max-width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--pp-cream);
+  transition: box-shadow 0.2s ease;
+}
+.ppp-d__img img {
+  position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+  object-fit: cover; transition: transform 0.5s var(--pp-ease);
+}
+.ppp-d__room:hover .ppp-d__img img { transform: scale(1.06); }
+.ppp-d__room:hover .ppp-d__img, .ppp-d__room:focus-visible .ppp-d__img { box-shadow: 0 0 0 3px var(--pp-paper), 0 0 0 6px var(--pp-orange); }
+.ppp-d__room:focus-visible { outline: none; }
+.ppp.is-open .ppp-d__room { animation: ppp-rise 0.5s var(--pp-ease) both; }
+.ppp-d__room:nth-child(2) { animation-delay: 0.06s !important; }
+.ppp-d__room:nth-child(3) { animation-delay: 0.12s !important; }
+.ppp-d__room:nth-child(4) { animation-delay: 0.18s !important; }
+@keyframes ppp-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.ppp-d__label { display: flex; flex-direction: column; gap: 3px; padding: 0 2px; }
+.ppp-d__label b { font: 700 15px/1.2 var(--pp-head); }
+.ppp-d__label small { font: 400 10.5px/1.3 var(--pp-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--pp-muted); }
+.ppp-d__match { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 28px; align-items: center; }
+.ppp-d__pick { display: flex; flex-direction: column; gap: 12px; margin: 0; min-width: 0; }
+.ppp-d__pick .ppp-d__img { aspect-ratio: 4 / 5; border-radius: 20px; }
+.ppp-d__pick figcaption { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 10px; padding: 0 2px; }
+.ppp-d__pick figcaption small { grid-column: 1 / -1; font: 700 10px var(--pp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--pp-dot1); }
+.ppp-d__pick figcaption b { font: 700 17px/1.25 var(--pp-head); }
+.ppp-d__pick figcaption span { font: 400 14px var(--pp-mono); }
+.ppp-d__form { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ppp-d .ppp-c__chosen i { background-size: cover; background-position: center; background-color: var(--pp-cream); }
+.ppp-d .ppp__done { padding: 6px 4px; }
+
+/* ---------- E · Print Job ---------- */
+.ppp--e { place-items: start center; padding: 0 16px; }
+.ppp__scrim--light { background: rgba(29, 28, 28, 0.3); }
+.ppp-e__wrap {
+  position: relative;
+  width: min(390px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 14px;
+  scrollbar-width: none;
+}
+.ppp-e__head {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border-radius: 0 0 20px 20px;
+  background: var(--pp-ink);
+  color: var(--pp-label);
+  font: 500 10.5px var(--pp-mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  pointer-events: auto;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.5), inset 0 -5px 0 #000;
+  transform: translateY(-100%);
+  transition: transform 0.4s var(--pp-ease);
+}
+.ppp.is-open .ppp-e__head { transform: none; }
+.ppp-e__head i { width: 8px; height: 8px; border-radius: 50%; background: var(--pp-orange); box-shadow: 0 0 0 3px var(--pp-halo); animation: ppp-blink 1.2s steps(2) infinite; }
+@keyframes ppp-blink { 50% { opacity: 0.35; } }
+.ppp-e {
+  width: calc(100% - 24px);
+  margin-top: -6px;
+  padding: 30px 24px 30px;
+  border-radius: 0;
+  background: #fffdf8;
+  overflow: visible;
+  max-height: none;
+  opacity: 1;
+  transform: translateY(-100%);
+  transition: transform 1.4s steps(16, end) 0.3s;
+  box-shadow: 0 26px 50px -22px rgba(29, 28, 28, 0.5);
+}
+.ppp.is-open .ppp-e { transform: none; }
+.ppp.is-closing .ppp-e { transition: transform 0.25s ease; transform: translateY(-110%); }
+.ppp-e .ppp__x { top: 12px; right: 12px; width: 32px; height: 32px; }
+.ppp-e__tear {
+  position: absolute; left: 0; right: 0; bottom: -8px; height: 8px;
+  background:
+    linear-gradient(135deg, #fffdf8 50%, transparent 50%) 0 0 / 12px 12px repeat-x,
+    linear-gradient(225deg, #fffdf8 50%, transparent 50%) 0 0 / 12px 12px repeat-x;
+}
+.ppp-e__job {
+  margin: 0; padding-bottom: 12px; border-bottom: 1.5px dashed var(--pp-ink);
+  font: 700 11px var(--pp-mono); letter-spacing: 0.18em; text-transform: uppercase;
+}
+.ppp-e .ppp__title { font-size: 28px; padding-right: 20px; }
+.ppp-e__rows {
+  margin: 0; padding: 12px 0; display: flex; flex-direction: column; gap: 6px;
+  border-top: 1.5px dashed var(--pp-ink); border-bottom: 1.5px dashed var(--pp-ink);
+  font: 400 13px var(--pp-mono);
+}
+.ppp-e__rows div { display: flex; justify-content: space-between; gap: 12px; }
+.ppp-e__rows dt { color: var(--pp-muted); letter-spacing: 0.1em; text-transform: uppercase; font-size: 11.5px; padding-top: 1px; }
+.ppp-e__rows dd { margin: 0; font-weight: 700; text-align: right; }
+.ppp-e .ppp__input {
+  height: 46px; padding: 0 2px; border: 0; border-bottom: 1.5px solid var(--pp-ink);
+  border-radius: 0; background: transparent;
+}
+.ppp-e .ppp__input:focus { box-shadow: none; border-bottom-color: var(--pp-orange-deep); }
+.ppp-e__progress { display: flex; flex-direction: column; gap: 8px; padding: 10px 0 4px; }
+.ppp-e__bar { display: block; height: 16px; border: 1.5px solid var(--pp-ink); border-radius: 999px; overflow: hidden; }
+.ppp-e__bar i {
+  display: block; height: 100%; width: 0;
+  background: repeating-linear-gradient(90deg, var(--pp-orange) 0 6px, var(--pp-orange-deep) 6px 8px);
+}
+.ppp-e__pct { font: 700 11px var(--pp-mono); letter-spacing: 0.16em; text-transform: uppercase; }
+
+/* ---------- minimised tab ---------- */
+.ppp-tab {
+  position: absolute;
+  left: max(20px, env(safe-area-inset-left, 0px));
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  background: var(--pp-paper);
+  border-radius: 999px;
+  box-shadow: 0 12px 30px -12px rgba(29, 28, 28, 0.45), 0 0 0 1.5px var(--pp-ink);
+  opacity: 0;
+  transform: translateX(-24px);
+  transition: opacity 0.25s ease, transform 0.45s var(--pp-ease);
+}
+.ppp--tab.is-open .ppp-tab { opacity: 1; transform: none; }
+.ppp-tab__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px 10px 12px;
+  border: 0;
+  background: none;
+  color: var(--pp-ink);
+  cursor: pointer;
+  font: 700 13px var(--pp-mono);
+}
+.ppp-tab__dots { display: grid; grid-template-columns: repeat(2, 8px); gap: 3px; }
+.ppp-tab__dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+.ppp-tab__dots i:nth-child(1) { background: var(--pp-dot1); }
+.ppp-tab__dots i:nth-child(2) { background: var(--pp-dot2); }
+.ppp-tab__dots i:nth-child(3) { background: var(--pp-dot3); }
+.ppp-tab__dots i:nth-child(4) { background: var(--pp-dot4); }
+.ppp-tab__open:hover span { text-decoration: underline; }
+.ppp-tab__x {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-right: 6px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(29, 28, 28, 0.07);
+  color: var(--pp-ink);
+  cursor: pointer;
+}
+.ppp-tab__x svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.ppp-tab button:focus-visible { outline: 2px solid var(--pp-ink); outline-offset: 2px; border-radius: 999px; }
+
+/* ---------- small screens (class set by script from the real width) ---------- */
+.ppp--compact.ppp--d { padding: 16px; }
+.ppp--compact .ppp-d { padding: 26px 20px 22px; }
+.ppp--compact .ppp-d__rooms { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.ppp--compact .ppp-d__rooms { gap: 14px 10px; }
+.ppp--compact .ppp-d__img { aspect-ratio: 1; border-radius: 14px; }
+.ppp--compact .ppp-d__match { grid-template-columns: 1fr; gap: 16px; }
+.ppp--compact .ppp-d__pick { flex-direction: row; align-items: center; gap: 14px; }
+.ppp--compact .ppp-d__pick .ppp-d__img { flex: none; width: 88px; aspect-ratio: 1; border-radius: 14px; }
+.ppp--compact .ppp-d__pick figcaption { flex: 1; grid-template-columns: 1fr; }
+.ppp--compact .ppp-d .ppp__x { background: rgba(255, 255, 255, 0.92); box-shadow: 0 2px 8px rgba(29, 28, 28, 0.2); }
+.ppp--compact.ppp--e { padding: 0 10px; }
+.ppp--compact .ppp-e .ppp__title { font-size: 25px; }
+.ppp--compact.ppp--a, .ppp--compact.ppp--b, .ppp--compact.ppp--d {
+  padding: 12px 12px calc(12px + var(--ppp-kb, 0px));
+}
+.ppp--compact .ppp__x { width: 44px; height: 44px; top: 10px; right: 10px; }
+.ppp--compact .ppp-a .ppp__x { top: 52px; }
+.ppp--compact .ppp__x svg { width: 18px; height: 18px; }
+.ppp--compact .ppp-c .ppp__title { padding-right: 46px; }
+.ppp--compact .ppp-d .ppp__title { padding-right: 50px; }
+.ppp--compact .ppp-e .ppp__title { padding-right: 40px; }
+.ppp--compact .ppp-b { overflow-y: auto; }
+.ppp--compact .ppp-tab__open { min-height: 44px; }
+.ppp--compact .ppp-tab__x { width: 36px; height: 36px; }
+.ppp--compact .ppp__title { font-size: 28px; }
+.ppp--compact .ppp-a .ppp__inner { padding: 24px 22px 26px; }
+.ppp--compact .ppp-b { grid-template-columns: 1fr; min-height: 0; }
+.ppp--compact .ppp-b__media { min-height: 0; height: clamp(110px, 24vh, 190px); }
+.ppp--compact .ppp-b__panel { padding: 26px 22px 26px; }
+.ppp--compact .ppp-b .ppp__title { font-size: 28px; }
+.ppp--compact .ppp-b .ppp__x { background: rgba(255, 255, 255, 0.9); }
+.ppp--compact .ppp-c {
+  left: 0;
+  right: 0;
+  bottom: var(--ppp-kb, 0px);
+  width: auto;
+  max-width: none;
+  max-height: calc(100% - 16px - var(--ppp-kb, 0px));
+  border-radius: 24px 24px 0 0;
+  padding: 26px max(20px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  box-shadow: 0 -18px 50px -18px rgba(29, 28, 28, 0.45), 0 0 0 1.5px var(--pp-ink);
+}
+.ppp--compact .ppp-c::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  margin-left: -20px;
+  border-radius: 4px;
+  background: var(--pp-line);
+}
+
+/* phones on their side: keep pictures small so the form is reachable */
+.ppp--short .ppp-b { grid-template-columns: 0.75fr 1.25fr; }
+.ppp--short .ppp-b__media { height: auto; min-height: 0; }
+.ppp--short .ppp-b__panel { padding: 22px 24px; }
+.ppp--short .ppp-a__dots, .ppp--short .ppp__done-dots { display: none; }
+.ppp--short .ppp-d__rooms { grid-template-columns: repeat(4, 1fr); }
+.ppp--short .ppp-d__img { aspect-ratio: 1; }
+.ppp--short .ppp__title { font-size: 24px; }
+.ppp--short .ppp__main, .ppp--short .ppp__form { gap: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ppp__card, .ppp__scrim, .ppp-tab, .ppp-e__head { transition: opacity 0.15s linear; transform: none !important; }
+  .ppp-a__track { animation: none; }
+  .ppp *, .ppp *::before { animation-duration: 0.001s !important; animation-delay: 0s !important; }
+}
+{% endraw %}</style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Newsletter popup",
+  "class": "pp-popup-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Turn on and A/B test"
+    },
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Show the popup",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "experiment",
+      "label": "Test name",
+      "default": "popup-test-1",
+      "info": "Change this name to start a brand-new test. Every visitor is shuffled into a design again."
+    },
+    {
+      "type": "range",
+      "id": "weight_a",
+      "label": "Design A · Pocket Pop (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "weight_b",
+      "label": "Design B · Lights On (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "weight_c",
+      "label": "Design C · Colour Pick (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "weight_d",
+      "label": "Design D · Room Match (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "weight_e",
+      "label": "Design E · Print Job (share of visitors)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "paragraph",
+      "content": "Set a design to 0 to switch it off. When you have a winner, set the others to 0. While editing here, the design with the biggest share is shown."
+    },
+    {
+      "type": "header",
+      "content": "When it appears"
+    },
+    {
+      "type": "range",
+      "id": "delay",
+      "label": "After this many seconds (0 = off)",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "s",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "scroll",
+      "label": "Or after scrolling this far (0 = off)",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "exit_intent",
+      "label": "Or when the mouse heads for the browser tabs (computers only)",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "mobile_delay",
+      "label": "On phones, after this many seconds (0 = off)",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "s",
+      "default": 12,
+      "info": "A little longer than on computers, so phone visitors from Google see the page first."
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_exit",
+      "label": "On phones, when someone flicks quickly back up the page (like they're about to leave)",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hide_days",
+      "label": "After someone closes it, hide it for",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "unit": "d",
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "tab",
+      "label": "After closing, keep a small tab in the corner to reopen it",
+      "default": true,
+      "info": "Visitors can hide the tab with its own x."
+    },
+    {
+      "type": "header",
+      "content": "Words"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Small label above the headline",
+      "default": "✹ the pocket list"
+    },
+    {
+      "type": "text",
+      "id": "headline_a",
+      "label": "Headline for A",
+      "default": "Get first dibs on new lamps."
+    },
+    {
+      "type": "text",
+      "id": "headline_b",
+      "label": "Headline for B",
+      "default": "Be first to the glow."
+    },
+    {
+      "type": "text",
+      "id": "headline_c",
+      "label": "Colour question for C",
+      "default": "What's your colour?"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Description",
+      "default": "Our monthly newsletter: new designs, fresh colours and early-bird specials, straight from the Melbourne studio."
+    },
+    {
+      "type": "text",
+      "id": "offer",
+      "label": "Offer line (leave empty for none)",
+      "default": "$10 off your first order over $100"
+    },
+    {
+      "type": "text",
+      "id": "button",
+      "label": "Button",
+      "default": "Join the list"
+    },
+    {
+      "type": "text",
+      "id": "fine",
+      "label": "Small print",
+      "default": "No spam. Unsubscribe anytime."
+    },
+    {
+      "type": "header",
+      "content": "Design D · Room Match"
+    },
+    {
+      "type": "text",
+      "id": "headline_d",
+      "label": "Room question",
+      "default": "Where's your next lamp going?"
+    },
+    {
+      "type": "text",
+      "id": "room_1",
+      "label": "Room 1 (name | mood)",
+      "default": "Living room | cosy & warm"
+    },
+    {
+      "type": "product",
+      "id": "room_1_product",
+      "label": "Room 1 lamp",
+      "info": "Defaults to the Mocha Lamp."
+    },
+    {
+      "type": "text",
+      "id": "room_2",
+      "label": "Room 2 (name | mood)",
+      "default": "Bedroom | calm & soft"
+    },
+    {
+      "type": "product",
+      "id": "room_2_product",
+      "label": "Room 2 lamp",
+      "info": "Defaults to the Bubble Lamp."
+    },
+    {
+      "type": "text",
+      "id": "room_3",
+      "label": "Room 3 (name | mood)",
+      "default": "Desk | bright & focused"
+    },
+    {
+      "type": "product",
+      "id": "room_3_product",
+      "label": "Room 3 lamp",
+      "info": "Defaults to the Limoncello Lamp."
+    },
+    {
+      "type": "text",
+      "id": "room_4",
+      "label": "Room 4 (name | mood)",
+      "default": "Dining | moody glow"
+    },
+    {
+      "type": "product",
+      "id": "room_4_product",
+      "label": "Room 4 lamp",
+      "info": "Defaults to the Astro Pendant Lamp."
+    },
+    {
+      "type": "header",
+      "content": "Design E · Print Job"
+    },
+    {
+      "type": "text",
+      "id": "headline_e",
+      "label": "Headline",
+      "default": "Print yourself $10 off."
+    },
+    {
+      "type": "textarea",
+      "id": "receipt",
+      "label": "Receipt lines",
+      "default": "Item | $10 off\nMin. spend | $100\nMade in | Melbourne\nStatus | waiting on you",
+      "info": "One line each, written as: label | value"
+    },
+    {
+      "type": "header",
+      "content": "After sign-up"
+    },
+    {
+      "type": "text",
+      "id": "success_title",
+      "label": "Thank-you headline",
+      "default": "You're on the list ✹"
+    },
+    {
+      "type": "textarea",
+      "id": "success_body",
+      "label": "Thank-you message",
+      "default": "Welcome in. Here is your $10 off, and new lamps will land in your inbox first."
+    },
+    {
+      "type": "text",
+      "id": "discount_code",
+      "label": "Discount code to show (optional)",
+      "default": "POCKET3141",
+      "info": "Must match a code under Discounts. Leave empty to show no code."
+    },
+    {
+      "type": "text",
+      "id": "shop_label",
+      "label": "Shop button",
+      "default": "Shop lamps"
+    },
+    {
+      "type": "header",
+      "content": "Design B photo"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_b",
+      "label": "Lamp photo",
+      "info": "A lit lamp works best: it starts dark and flickers on. Defaults to the Limoncello Lamp."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter popup"
+    }
+  ]
+}
+{% endschema %}
