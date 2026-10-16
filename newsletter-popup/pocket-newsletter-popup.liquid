@@ -1542,17 +1542,18 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "range",
       "id": "weight_a",
-      "label": "Design A · Pocket Pop (share of visitors)",
+      "label": "Design A · Pocket Pop",
       "min": 0,
       "max": 100,
       "step": 1,
       "unit": "%",
-      "default": 20
+      "default": 20,
+      "info": "Share of visitors who see this design."
     },
     {
       "type": "range",
       "id": "weight_b",
-      "label": "Design B · Lights On (share of visitors)",
+      "label": "Design B · Lights On",
       "min": 0,
       "max": 100,
       "step": 1,
@@ -1562,7 +1563,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "range",
       "id": "weight_c",
-      "label": "Design C · Colour Pick (share of visitors)",
+      "label": "Design C · Colour Pick",
       "min": 0,
       "max": 100,
       "step": 1,
@@ -1572,7 +1573,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "range",
       "id": "weight_d",
-      "label": "Design D · Room Match (share of visitors)",
+      "label": "Design D · Room Match",
       "min": 0,
       "max": 100,
       "step": 1,
@@ -1582,7 +1583,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "range",
       "id": "weight_e",
-      "label": "Design E · Print Job (share of visitors)",
+      "label": "Design E · Print Job",
       "min": 0,
       "max": 100,
       "step": 1,
@@ -1600,50 +1601,54 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "range",
       "id": "delay",
-      "label": "After this many seconds (0 = off)",
+      "label": "Computers: show after",
       "min": 0,
       "max": 60,
       "step": 1,
       "unit": "s",
-      "default": 8
+      "default": 8,
+      "info": "0 turns this off."
     },
     {
       "type": "range",
       "id": "scroll",
-      "label": "Or after scrolling this far (0 = off)",
+      "label": "Or after scrolling",
       "min": 0,
       "max": 100,
       "step": 5,
       "unit": "%",
-      "default": 40
+      "default": 40,
+      "info": "0 turns this off."
     },
     {
       "type": "checkbox",
       "id": "exit_intent",
-      "label": "Or when the mouse heads for the browser tabs (computers only)",
-      "default": true
+      "label": "Computers: show on exit",
+      "default": true,
+      "info": "When the mouse heads for the browser tabs."
     },
     {
       "type": "range",
       "id": "mobile_delay",
-      "label": "On phones, after this many seconds (0 = off)",
+      "label": "Phones: show after",
       "min": 0,
       "max": 60,
       "step": 1,
       "unit": "s",
       "default": 12,
-      "info": "A little longer than on computers, so phone visitors from Google see the page first."
+      "info": "0 turns this off. A little longer than on computers, so visitors from Google see the page first."
     },
     {
       "type": "checkbox",
       "id": "mobile_exit",
-      "label": "On phones, when someone flicks quickly back up the page (like they're about to leave)",
-      "default": true
+      "label": "Phones: show on quick scroll up",
+      "default": true,
+      "info": "When someone flicks back up the page, like they are about to leave."
     },
     {
       "type": "range",
       "id": "hide_days",
-      "label": "After someone closes it, hide it for",
+      "label": "After closing, hide for",
       "min": 1,
       "max": 60,
       "step": 1,
@@ -1653,9 +1658,9 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "checkbox",
       "id": "tab",
-      "label": "After closing, keep a small tab in the corner to reopen it",
+      "label": "Keep a small reopen tab",
       "default": true,
-      "info": "Visitors can hide the tab with its own x."
+      "info": "After closing, a small tab stays in the corner. Visitors can hide it with its own x."
     },
     {
       "type": "header",
@@ -1664,7 +1669,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "text",
       "id": "eyebrow",
-      "label": "Small label above the headline",
+      "label": "Small label above headline",
       "default": "✹ the pocket list"
     },
     {
@@ -1694,8 +1699,9 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "text",
       "id": "offer",
-      "label": "Offer line (leave empty for none)",
-      "default": "$10 off your first order over $100"
+      "label": "Offer line",
+      "default": "$10 off your first order over $100",
+      "info": "Leave empty for none."
     },
     {
       "type": "text",
@@ -1722,8 +1728,9 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "text",
       "id": "room_1",
-      "label": "Room 1 (name | mood)",
-      "default": "Living room | cosy & warm"
+      "label": "Room 1",
+      "default": "Living room | cosy & warm",
+      "info": "Written as: name | mood"
     },
     {
       "type": "product",
@@ -1734,8 +1741,9 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "text",
       "id": "room_2",
-      "label": "Room 2 (name | mood)",
-      "default": "Bedroom | calm & soft"
+      "label": "Room 2",
+      "default": "Bedroom | calm & soft",
+      "info": "Written as: name | mood"
     },
     {
       "type": "product",
@@ -1746,8 +1754,9 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "text",
       "id": "room_3",
-      "label": "Room 3 (name | mood)",
-      "default": "Desk | bright & focused"
+      "label": "Room 3",
+      "default": "Desk | bright & focused",
+      "info": "Written as: name | mood"
     },
     {
       "type": "product",
@@ -1758,8 +1767,9 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "text",
       "id": "room_4",
-      "label": "Room 4 (name | mood)",
-      "default": "Dining | moody glow"
+      "label": "Room 4",
+      "default": "Dining | moody glow",
+      "info": "Written as: name | mood"
     },
     {
       "type": "product",
@@ -1803,7 +1813,7 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     {
       "type": "text",
       "id": "discount_code",
-      "label": "Discount code to show (optional)",
+      "label": "Discount code to show",
       "default": "POCKET3141",
       "info": "Must match a code under Discounts. Leave empty to show no code."
     },
