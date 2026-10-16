@@ -69,7 +69,7 @@ The tab has its own × to hide it. Both can be turned off or reworded.
 
 ### Who never sees it
 
-People who already signed up, anyone who closed it in the last 14 days (adjustable),
+People who already signed up, anyone who closed it in the last 14 days (they only see the small tab),
 logged-in customers already subscribed, and the cart and account pages.
 
 ## For developers
