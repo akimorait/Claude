@@ -25,15 +25,20 @@
 
   const VARIANTS = ['A', 'B', 'C', 'D', 'E'];
   const MODAL = { A: true, B: true, C: false, D: true, E: true };
+  // Best-selling colours first: net sales by product vendor (the store keeps
+  // each product's colour in its Vendor field), last 6 months. Swatch colours
+  // match the store's "Shop by colour" row; each id is that colour's
+  // collection handle (those collections are built from the vendor).
   const COLOURS = C.colours || [
-    { id: 'lemon', name: 'Lemon', hex: '#F5D04C' },
-    { id: 'candy', name: 'Candy', hex: '#F2A6B8' },
-    { id: 'mandarin', name: 'Mandarin', hex: '#F08A2C' },
-    { id: 'chocolate', name: 'Chocolate', hex: '#5E3B2A' },
-    { id: 'oatmeal', name: 'Oatmeal', hex: '#E6D8BF' },
-    { id: 'spearmint', name: 'Spearmint', hex: '#9ED3B8' },
-    { id: 'maple', name: 'Maple', hex: '#B9773F' },
+    { id: 'coffee', name: 'Coffee', hex: '#d4b89b' },
+    { id: 'lemon', name: 'Lemon', hex: '#f7e569' },
+    { id: 'maple', name: 'Maple', hex: '#c68642' },
+    { id: 'natural', name: 'Natural', hex: '#a69f8e' },
+    { id: 'mandarin', name: 'Mandarin', hex: '#ff8243' },
+    { id: 'oatmeal', name: 'Oatmeal', hex: '#eeddb2' },
+    { id: 'spearmint', name: 'Spearmint', hex: '#7ab87f' },
   ];
+  const collectionUrl = (handle) => (C.collectionsUrl || '/collections') + '/' + encodeURIComponent(handle);
 
   const ROOMS = (C.rooms || []).filter((r) => r && r.name);
 
@@ -141,7 +146,8 @@
     return `<form class="ppp__form" novalidate>
         <label class="ppp__sr" for="ppp-email">Email address</label>
         <input id="ppp-email" class="ppp__input" type="email" name="email" autocomplete="email"
-          inputmode="email" placeholder="${esc(C.placeholder || 'your@email.com')}" required>
+          inputmode="email" enterkeyhint="send" autocapitalize="none" autocorrect="off" spellcheck="false"
+          placeholder="${esc(C.placeholder || 'your@email.com')}" required>
         <button class="ppp__btn" type="submit">${esc(label || C.button || 'Join the list')}</button>
         <p class="ppp__err" role="alert" hidden></p>
         ${C.fine ? `<p class="ppp__fine">${esc(C.fine)}</p>` : ''}
@@ -248,14 +254,14 @@
             <h2 class="ppp__title" id="ppp-title">${esc(C.headlineD)}</h2>
             <div class="ppp-d__rooms" role="group" aria-label="Rooms">
               ${ROOMS.map((r, i) => `<button type="button" class="ppp-d__room" data-room="${i}">
-                  ${r.image ? `<img src="${esc(r.image)}" alt="" loading="lazy" decoding="async">` : ''}
+                  <span class="ppp-d__img">${r.image ? `<img src="${esc(r.image)}" alt="" decoding="async">` : ''}</span>
                   <span class="ppp-d__label"><b>${esc(r.name)}</b><small>${esc(r.mood)}</small></span>
                 </button>`).join('')}
             </div>
           </div>
           <div class="ppp-d__step ppp-d__match" data-step="form" hidden>
             <figure class="ppp-d__pick">
-              <img alt="" decoding="async">
+              <span class="ppp-d__img"><img alt="" decoding="async"></span>
               <figcaption><small>Our pick</small><b></b><span></span></figcaption>
             </figure>
             <div class="ppp-d__form">
@@ -293,11 +299,26 @@
 
   /* ---------- open / close ---------- */
 
-  function viewportWidth() {
-    return mount === document.body ? window.innerWidth : mount.clientWidth;
+  function viewportSize() {
+    return mount === document.body
+      ? [window.innerWidth, window.innerHeight]
+      : [mount.clientWidth, mount.clientHeight];
   }
+  // Phones (narrow) and phones on their side (short) both get the compact
+  // layout; "short" also trims tall pictures so the form stays reachable.
   function fit() {
-    if (root) root.classList.toggle('ppp--compact', viewportWidth() < 640);
+    if (!root) return;
+    const [w, h] = viewportSize();
+    root.classList.toggle('ppp--compact', w < 640 || h < 520);
+    root.classList.toggle('ppp--short', h < 520);
+  }
+
+  // When the phone keyboard opens, lift the popup above it.
+  function onKeyboard() {
+    const vv = window.visualViewport;
+    if (!root || !vv || mount !== document.body) return;
+    const covered = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    root.style.setProperty('--ppp-kb', covered + 'px');
   }
 
   function open(v, opts) {
@@ -413,6 +434,10 @@
     });
     const form = el.querySelector('.ppp__form');
     if (form) form.addEventListener('submit', onSubmit);
+    el.addEventListener('focusin', (e) => {
+      if (!e.target.matches('.ppp__input') || !el.classList.contains('ppp--compact')) return;
+      setTimeout(() => { onKeyboard(); e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 300);
+    });
   }
 
   function stepTo(step) {
@@ -434,6 +459,12 @@
       ? (C.headlineCAll || 'Can’t pick just one? Fair.')
       : String(C.headlineC2 || 'Good pick. [colour] it is.').replace(/\[colou?r\]/gi, name);
     root.querySelector('.ppp-c__title2').textContent = headline;
+    // Point the thank-you button at that colour's collection.
+    const shop = root.querySelector('.ppp__btn--link');
+    if (shop) {
+      shop.href = id === 'all' ? (C.shopUrl || '/collections/all') : collectionUrl(id);
+      shop.textContent = id === 'all' ? (C.shopLabel || 'Shop lamps') : 'Shop ' + name + ' lamps';
+    }
     track('popup_choice', { popup_choice: id });
     stepTo('form');
   }
@@ -445,8 +476,8 @@
     const pick = root.querySelector('.ppp-d__pick');
     const img = pick.querySelector('img');
     if (r.image) { img.src = r.image; img.hidden = false; } else { img.hidden = true; }
-    pick.querySelector('b').textContent = r.product || '';
-    pick.querySelector('span').textContent = r.price || '';
+    pick.querySelector('figcaption b').textContent = r.product || '';
+    pick.querySelector('figcaption span').textContent = r.price || '';
     const chip = root.querySelector('.ppp-d__form .ppp-c__chosen');
     chip.querySelector('span').textContent = r.name;
     chip.querySelector('i').style.backgroundImage = r.image ? `url("${r.image.replace(/"/g, '%22')}")` : '';
@@ -609,8 +640,29 @@
       open(v, { trigger });
     };
 
-    const delay = Number(C.delay) || 0;
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
+    const delay = Number(finePointer || C.mobileDelay == null ? C.delay : C.mobileDelay) || 0;
     if (delay > 0) timers.push(setTimeout(() => fire('delay'), delay * 1000));
+
+    // Phones have no mouse to leave the page with. A quick flick back up the
+    // page (usually heading for the address bar) stands in for exit intent.
+    if (C.mobileExit !== false && !finePointer) {
+      const armedAt = Date.now();
+      let anchorY = window.scrollY;
+      let anchorT = performance.now();
+      let deepest = 0;
+      listen(window, 'scroll', () => {
+        const y = window.scrollY;
+        const t = performance.now();
+        deepest = Math.max(deepest, y);
+        const dt = t - anchorT;
+        const speed = (anchorY - y) / Math.max(dt, 1); // px per ms, upwards
+        if (Date.now() - armedAt > 5000 && deepest > window.innerHeight && deepest - y > 300 && speed > 1.5) {
+          fire('scroll_up');
+        }
+        if (dt > 120) { anchorY = y; anchorT = t; }
+      }, { passive: true });
+    }
 
     const scrollPct = Number(C.scroll) || 0;
     if (scrollPct > 0) {
@@ -620,7 +672,7 @@
       }, { passive: true });
     }
 
-    if (C.exitIntent && window.matchMedia('(pointer: fine)').matches) {
+    if (C.exitIntent && finePointer) {
       // Wait a few seconds so a quick mouse flick on arrival doesn't count.
       timers.push(setTimeout(() => {
         listen(document, 'mouseout', (e) => {
@@ -634,6 +686,10 @@
   function boot() {
     listen(document, 'keydown', onKey);
     listen(window, 'resize', fit);
+    if (window.visualViewport) {
+      listen(window.visualViewport, 'resize', onKeyboard);
+      listen(window.visualViewport, 'scroll', onKeyboard);
+    }
     if (mount !== document.body && 'ResizeObserver' in window) {
       const ro = new ResizeObserver(fit);
       ro.observe(mount);

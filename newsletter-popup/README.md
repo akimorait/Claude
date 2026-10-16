@@ -7,7 +7,7 @@ tested against each other.
 | --- | --- |
 | **A · Pocket Pop** | Centred card with the cream scrolling strip, the four logo dots and the orange halo button. |
 | **B · Lights On** | Split card. A lamp photo flickers on as it opens, next to a cream panel. |
-| **C · Colour Pick** | Small corner card (bottom sheet on phones) that asks for a favourite colour, then the email. |
+| **C · Colour Pick** | Small corner card (bottom sheet on phones) that asks for a favourite colour, then the email. Colours are your 7 best sellers by vendor (Coffee, Lemon, Maple, Natural, Mandarin, Oatmeal, Spearmint) and the thank-you button opens that colour's collection. |
 | **D · Room Match** | Visitors pick the room it's for (living room, bedroom, desk, dining), see a matching lamp, then sign up. The thank-you button links to that lamp. |
 | **E · Print Job** | A receipt prints down from the top of the screen like a 3D printer, with a "printing" bar before the code appears. |
 
@@ -67,6 +67,11 @@ Whichever happens first (all adjustable in the theme editor):
 - scrolling 40% down a page
 - on computers, the mouse heading up to leave the page (exit intent)
 
+On phones (adjustable separately): after 12 seconds, after scrolling 40%, or
+when someone flicks quickly back up the page, which is what people do just
+before leaving. The longer phone delay means visitors arriving from Google see
+the page first.
+
 After someone closes it, it stays away for 14 days. In that time a small
 **"Get $10 off" tab** sits in the bottom-left corner so they can reopen it.
 The tab has its own × to hide it. Both can be turned off or reworded.
@@ -75,6 +80,13 @@ The tab has its own × to hide it. Both can be turned off or reworded.
 
 People who already signed up, anyone who closed it in the last 14 days (they only see the small tab),
 logged-in customers already subscribed, and the cart and account pages.
+
+## Phones
+
+Tested on iPhone 13, iPhone SE, Galaxy S8 and iPhone sideways: every design
+fits or scrolls inside its card, the email box doesn't make iPhones zoom in
+(16px text), close buttons are 44px, the popup lifts above the keyboard, and
+the corner tab's buttons are thumb-sized.
 
 ## For developers
 

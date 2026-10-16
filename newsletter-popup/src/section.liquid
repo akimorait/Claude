@@ -39,6 +39,8 @@
       "delay": {{ s.delay | json }},
       "scroll": {{ s.scroll | json }},
       "exitIntent": {{ s.exit_intent | json }},
+      "mobileDelay": {{ s.mobile_delay | json }},
+      "mobileExit": {{ s.mobile_exit | json }},
       "hideDays": {{ s.hide_days | json }},
       "tab": {{ s.tab | json }},
       "tabLabel": {{ s.tab_label | json }},
@@ -97,6 +99,7 @@
       "shopLabel": {{ s.shop_label | json }},
       "shopUrl": {{ s.shop_link | default: routes.all_products_collection_url | json }},
       "imageB": {% if image_b != blank %}{{ image_b | image_url: width: 900 | json }}{% else %}""{% endif %},
+      "collectionsUrl": {{ routes.collections_url | json }},
       "contactUrl": {{ contact_url | json }}
     }
   </script>
@@ -152,6 +155,11 @@
     { "type": "range", "id": "delay", "label": "After this many seconds (0 = off)", "min": 0, "max": 60, "step": 1, "unit": "s", "default": 8 },
     { "type": "range", "id": "scroll", "label": "Or after scrolling this far (0 = off)", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40 },
     { "type": "checkbox", "id": "exit_intent", "label": "Or when the mouse heads for the browser tabs (computers only)", "default": true },
+    {
+      "type": "range", "id": "mobile_delay", "label": "On phones, after this many seconds (0 = off)", "min": 0, "max": 60, "step": 1, "unit": "s", "default": 12,
+      "info": "A little longer than on computers, so phone visitors from Google see the page first."
+    },
+    { "type": "checkbox", "id": "mobile_exit", "label": "On phones, when someone flicks quickly back up the page (like they're about to leave)", "default": true },
     { "type": "range", "id": "hide_days", "label": "After someone closes it, hide it for", "min": 1, "max": 60, "step": 1, "unit": "d", "default": 14 },
     {
       "type": "checkbox", "id": "tab", "label": "After closing, keep a small tab in the corner to reopen it", "default": true,
@@ -166,7 +174,7 @@
     { "type": "text", "id": "headline_c", "label": "Colour question for C", "default": "What's your colour?" },
     {
       "type": "text", "id": "headline_c2", "label": "C headline after picking", "default": "Good pick. [colour] it is.",
-      "info": "[colour] is swapped for the colour they chose."
+      "info": "[colour] is swapped for the colour they chose. The colours are your best sellers by vendor (Coffee, Lemon, Maple, Natural, Mandarin, Oatmeal, Spearmint), and the thank-you button opens that colour's collection."
     },
     {
       "type": "textarea", "id": "body", "label": "Description",
