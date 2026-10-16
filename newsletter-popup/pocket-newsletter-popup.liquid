@@ -103,10 +103,15 @@
     }
   </script>
 
-  <div hidden>
+  {%- comment -%}
+    Visually hidden rather than display:none, so Shopify's captcha can still
+    attach to this form and show its check if it ever needs one.
+  {%- endcomment -%}
+  <div style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">
     {%- form 'customer', id: 'pp-popup-native' -%}
       <input type="hidden" name="contact[email]" value="">
       <input type="hidden" name="contact[tags]" value="newsletter">
+      <button type="submit" tabindex="-1" aria-hidden="true">Join</button>
       <span id="pp-popup-state" data-posted="{{ form.posted_successfully? }}" data-errors="{{ form.errors | default_errors | strip_html | strip | escape }}"></span>
     {%- endform -%}
   </div>
@@ -1298,7 +1303,13 @@ html.ppp-lock, html.ppp-lock body { overflow: hidden; }
     f.querySelector('[name="contact[email]"]').value = email;
     f.querySelector('[name="contact[tags]"]').value = tags;
     store.set(K.pending, JSON.stringify({ v: variant, c: choice ? choice.id : 'none' }));
-    f.submit();
+    // Submit like a button press so Shopify's captcha script sees the submit
+    // event and adds its token first. A plain f.submit() skips it and Shopify
+    // answers "Missing CAPTCHA token".
+    const btn = f.querySelector('[type="submit"]');
+    if (typeof f.requestSubmit === 'function') f.requestSubmit(btn || undefined);
+    else if (btn) btn.click();
+    else f.submit();
     return true;
   }
 

@@ -103,10 +103,15 @@
     }
   </script>
 
-  <div hidden>
+  {%- comment -%}
+    Visually hidden rather than display:none, so Shopify's captcha can still
+    attach to this form and show its check if it ever needs one.
+  {%- endcomment -%}
+  <div style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">
     {%- form 'customer', id: 'pp-popup-native' -%}
       <input type="hidden" name="contact[email]" value="">
       <input type="hidden" name="contact[tags]" value="newsletter">
+      <button type="submit" tabindex="-1" aria-hidden="true">Join</button>
       <span id="pp-popup-state" data-posted="{{ form.posted_successfully? }}" data-errors="{{ form.errors | default_errors | strip_html | strip | escape }}"></span>
     {%- endform -%}
   </div>

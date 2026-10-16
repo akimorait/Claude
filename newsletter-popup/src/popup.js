@@ -534,7 +534,13 @@
     f.querySelector('[name="contact[email]"]').value = email;
     f.querySelector('[name="contact[tags]"]').value = tags;
     store.set(K.pending, JSON.stringify({ v: variant, c: choice ? choice.id : 'none' }));
-    f.submit();
+    // Submit like a button press so Shopify's captcha script sees the submit
+    // event and adds its token first. A plain f.submit() skips it and Shopify
+    // answers "Missing CAPTCHA token".
+    const btn = f.querySelector('[type="submit"]');
+    if (typeof f.requestSubmit === 'function') f.requestSubmit(btn || undefined);
+    else if (btn) btn.click();
+    else f.submit();
     return true;
   }
 
