@@ -1,0 +1,66 @@
+/* ---------- Proposed clean-up for /pages/reviews ---------- */
+
+/* 1. Hero: one rating line instead of eyebrow + 3 stat tiles */
+.pocket-reviews .pr-eyebrow { display: none; }
+.pocket-reviews .pr-rating { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: .4rem .8rem; margin: 1.6rem 0 0; font-size: 1.4rem; }
+.pocket-reviews .pr-rating .pr-stars { font-size: 1.6rem; }
+.pocket-reviews .pr-rating b { font-family: var(--font-heading-family); font-size: 1.7rem; }
+
+/* Calmer swipe stack: one card peeking behind, gentler tilt */
+.pocket-reviews .pr-card[data-pos="0"] { transform: none; }
+.pocket-reviews .pr-card[data-pos="1"] { transform: translateY(1.8rem) scale(.95); }
+.pocket-reviews .pr-card[data-pos="2"] { opacity: 0; transform: translateY(1.8rem) scale(.95); }
+.pocket-reviews .pr-card[data-tone=amber] .pr-stars { color: rgb(var(--pr-fg)); }
+.pocket-reviews .pr-stack-hint { margin-top: 2.2rem; }
+.pocket-reviews .pr-stack-hint > span:first-child { display: none; }
+
+/* 2. Most-loved lamps: photo, name, rating + price. Whole card is tappable */
+.pocket-reviews .pr-lamp__quote, .pocket-reviews .pr-lamp__more { display: none; }
+.pocket-reviews .pr-lamp .card__heading { font-size: 1.6rem; }
+.pocket-reviews .pr-lamp__meta { font-size: 1.3rem; }
+.pocket-reviews .pr-lamp__meta .pr-lamp__rate { display: inline-flex; align-items: center; gap: .4rem; }
+.pocket-reviews .pr-lamp__meta .pr-lamp__rate b { color: rgb(var(--pr-accent)); }
+.pocket-reviews .pr-lamp__meta .pr-lamp__rate span { opacity: .7; }
+.pocket-reviews .pr-lamp__price { margin-top: .2rem; font-size: 1.3rem; }
+.pocket-reviews .pr-lamp__media .badge { font-size: 1.1rem; }
+
+/* 3. Remove the scrolling orange band and the duplicate "In your homes" row */
+.pocket-reviews .pr-band, .pocket-reviews .pr-section:has(.pr-photos) { display: none; }
+
+/* Fewer instruction lines under headings */
+.pocket-reviews .pr-section .pr-sub { display: none; }
+
+/* 4. Topic chips: smaller, no emoji */
+.pocket-reviews .pr-chip { min-height: 3.6rem; padding: .4rem 1.4rem; font-size: 1.25rem; }
+
+/* 5. Promises line under the final button (replaces the band) */
+.pocket-reviews .pr-cta { padding-top: 4rem; }
+.pocket-reviews .pr-promises { margin: 1.6rem 0 0; font-size: 1.2rem; opacity: .7; }
+
+/* 6. Bottom bar: shorter text so it never wraps */
+.pocket-reviews .pr-dock__text { white-space: nowrap; }
+
+@media screen and (max-width: 749px) {
+  .pocket-reviews .pr-hero { padding-top: 2.4rem; }
+  .pocket-reviews .pr-title { font-size: 3.8rem; }
+  .pocket-reviews .pr-stack { height: 25rem; margin-top: 2.4rem; }
+  .pocket-reviews .pr-card { padding: 2rem; }
+  .pocket-reviews .pr-card p.pr-card__big { font-size: 1.5rem; -webkit-line-clamp: 6; }
+
+  /* Show ~2 lamps at once so it's clear the row scrolls */
+  .pocket-reviews .pr-lamp { width: 44%; }
+
+  /* Reviews become one easy-to-read list: small photo on the left, words on the right */
+  .pocket-reviews .pr-feed { grid-template-columns: 1fr; gap: 0; margin-top: .4rem; }
+  .pocket-reviews .pr-q, .pocket-reviews .pr-q--photo { grid-column: 1 / -1; padding: 1.6rem 0; border-radius: 0; background: none; border-bottom: .1rem solid rgba(var(--pr-fg), .1); font-size: 1.35rem; }
+  .pocket-reviews .pr-q--photo { display: grid; grid-template-columns: 8.8rem 1fr; column-gap: 1.4rem; align-content: start; }
+  .pocket-reviews .pr-q--photo .pr-q__img { grid-row: 1 / span 3; aspect-ratio: 1; margin: 0; }
+  .pocket-reviews .pr-q--photo .pr-q__text { -webkit-line-clamp: 3; }
+  .pocket-reviews .pr-q h4 { font-size: 1.5rem; }
+  .pocket-reviews .pr-feed .pr-more { margin-top: 2rem; }
+}
+
+@media screen and (min-width: 750px) {
+  /* Shorter photo cards on desktop */
+  .pocket-reviews .pr-q--photo .pr-q__img { aspect-ratio: 1; }
+}
